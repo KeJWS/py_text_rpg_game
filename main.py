@@ -108,17 +108,24 @@ class Battle:
         clear_screen()
 
 def battle(player):
-    enemy = get_random_enemy()
+    enemy = get_random_enemy(player.level)
     battle_instance = Battle(player, enemy)
     battle_instance.process_battle()
 
 # 在游戏开始时加载敌人
 enemies = load_enemies()
 
-def get_random_enemy():
-    enemy = random.choice(enemies)
-    enemy.HP = enemy.MaxHP  # 确保每次战斗开始时敌人的血量是满的
-    enemy.MP = enemy.MaxMP  # 同时恢复敌人的魔法值
+def get_random_enemy(player_level):
+    # 按照玩家等级筛选合适的敌人
+    available_enemies = [enemy for enemy in enemies if enemy.min_level <= player_level <= enemy.max_level]
+    
+    if not available_enemies:
+        print("⚠️ 没有找到适合当前等级的敌人，默认返回最低等级敌人！")
+        return min(enemies, key=lambda e: e.min_level)  # 返回最低等级敌人，避免错误
+
+    enemy = random.choice(available_enemies)  # 随机选择适合玩家等级的敌人
+    enemy.HP = enemy.MaxHP
+    enemy.MP = enemy.MaxMP
     return enemy
 
 def choose_class():
