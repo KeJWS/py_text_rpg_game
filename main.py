@@ -24,7 +24,7 @@ class Battle:
                 return False  # 取消行动
         elif action == "q":
             if self.try_escape():
-                return True  # 逃跑成功，战斗结束
+                return True  # 逃跑成功
         elif action == "d":
             self.defense_mode[self.player.name] = True
             print("你进入防御状态，本回合受到的伤害减少50%！")
@@ -120,12 +120,38 @@ def main():
     weapons = load_weapons()
     armors = load_armor()
 
+    # 给玩家装备一个武器和一件装备
+    print("选择武器：")
+    for key, weapon in weapons.items():
+        print(f"{key}: {weapon}")
+    weapon_choice = input("请输入武器名称: ")
+    weapon = weapons.get(weapon_choice, None)
+    if weapon:
+        player.equip_weapon(weapon)
+    else:
+        print("无效的武器选择，默认选择长剑。")
+        player.equip_weapon(weapons.get("长剑"))
+
+    print("选择护甲：")
+    for key, armor in armors.items():
+        print(f"{key}: {armor}")
+    armor_choice = input("请输入护甲名称: ")
+    armor = armors.get(armor_choice, None)
+    clear_screen()
+    if armor:
+        player.equip_armor(armor)
+    else:
+        print("无效的护甲选择，默认选择铁甲。")
+        player.equip_armor(armors.get("铁甲"))
+
     while player.HP > 0:
         print(f"\n当前金币: {player.gold}")
         print(f"HP: {player.HP}/{player.MaxHP}")
         print(f"MP: {player.MP}/{player.MaxMP}")
         print(f"EXP: {player.exp}/{player.exp_to_next}")
         print(f"暴击率: {player.LUK/2}%")
+        print(f"ATK: {player.ATK}")
+        print(f"DEF: {player.ATK}")
         print(f"武器: {player.weapon}")
 
         if player.equipment:
