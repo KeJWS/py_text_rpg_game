@@ -1,20 +1,28 @@
-# 修改战斗的处理部分
+import csv
+from character import Weapon, Equipment, Character
 
-class Enemy(Character):
-    def __init__(self, name, max_hp, max_mp, atk, defense, mat, mdf, agi, luk, skill, exp_reward, gold_reward):
-        super().__init__(name, max_hp, max_mp, atk, defense, mat, mdf, agi, luk, skill)
-        self.exp_reward = exp_reward
-        self.gold_reward = gold_reward
-
-def get_random_enemy():
-    # 修改敌人生成，确保其血量合理，不会过低
-    enemy = random.choice(enemies)
-    enemy.HP = enemy.MaxHP  # 确保每次战斗开始时敌人的血量是满的
-    enemy.MP = enemy.MaxMP  # 同时恢复敌人的魔法值
-    return enemy
-
-# 战斗逻辑处理
-def battle(player):
-    enemy = get_random_enemy()  # 获取一个随机敌人
-    battle_instance = Battle(player, enemy)
-    battle_instance.process_battle()
+def load_classes(filename="classes.csv"):
+    classes = {}
+    with open(filename, mode='r', encoding='utf-8') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            name = row['name']
+            max_hp = int(row['max_hp'])
+            max_mp = int(row['max_mp'])
+            atk = int(row['atk'])
+            defense = int(row['defense'])
+            mat = int(row['mat'])
+            mdf = int(row['mdf'])
+            agi = int(row['agi'])
+            luk = int(row['luk'])
+            skill = row['skill']
+            weapon_name = row['weapon']
+            armor_name = row['armor']
+            
+            # 创建类并分配武器和护甲
+            character = Character(name, max_hp, max_mp, atk, defense, mat, mdf, agi, luk, skill)
+            character.weapon = Weapon(weapon_name, atk)  # 根据武器名称创建武器
+            character.equipment = [Equipment(armor_name, defense, max_hp * 0.2)]  # 根据护甲名称创建护甲
+            
+            classes[name] = character
+    return classes

@@ -1,8 +1,8 @@
 import csv
 import random
 import os
-from game_data import load_classes, load_enemies
-from character import Character, Enemy
+from game_data import load_classes, load_enemies, load_weapons, load_armor
+from character import Character, Enemy, Weapon, Equipment
 
 class Battle:
     def __init__(self, player, enemy):
@@ -116,12 +116,23 @@ def main():
     player = choose_class()
     print(f"你选择了 {player.name}，冒险开始！")
 
+    # 加载武器和护甲
+    weapons = load_weapons()
+    armors = load_armor()
+
     while player.HP > 0:
         print(f"\n当前金币: {player.gold}")
         print(f"HP: {player.HP}/{player.MaxHP}")
         print(f"MP: {player.MP}/{player.MaxMP}")
         print(f"EXP: {player.exp}/{player.exp_to_next}")
         print(f"暴击率: {player.LUK/2}%")
+        print(f"武器: {player.weapon}")
+
+        if player.equipment:
+            print("护甲: " + ", ".join(str(item) for item in player.equipment))
+        else:
+            print("护甲: None")
+
         command = input("输入 'q' 退出游戏, 按 Enter 继续战斗: ")
         if command.lower() == 'q':
             print("游戏结束，再见！")

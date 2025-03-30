@@ -1,5 +1,22 @@
 import random
 
+class Weapon:
+    def __init__(self, name, attack_bonus):
+        self.name = name
+        self.attack_bonus = attack_bonus
+
+    def __str__(self):
+        return f"{self.name} (ATK + {self.attack_bonus})"
+
+class Equipment:
+    def __init__(self, name, defense_bonus, health_bonus):
+        self.name = name
+        self.defense_bonus = defense_bonus
+        self.health_bonus = health_bonus
+
+    def __str__(self):
+        return f"{self.name} (DEF + {self.defense_bonus}, MaxHP + {self.health_bonus})"
+
 class Character:
     def __init__(self, name, max_hp, max_mp, atk, defense, mat, mdf, agi, luk, skill):
         self.name = name
@@ -18,6 +35,21 @@ class Character:
         self.exp = 0
         self.exp_to_next = 50
         self.gold = 0
+        self.weapon = None
+        self.equipment = []
+
+    def equip_weapon(self, weapon):
+        """装备武器"""
+        self.weapon = weapon
+        self.ATK += weapon.attack_bonus
+        print(f"{self.name} 装备了武器 {weapon.name}，攻击力增加 {weapon.attack_bonus}")
+
+    def equip_armor(self, equipment):
+        """装备防具"""
+        self.equipment.append(equipment)
+        self.DEF += equipment.defense_bonus
+        self.MaxHP += equipment.health_bonus
+        print(f"{self.name} 装备了 {equipment.name}，增加了防御 {equipment.defense_bonus}，生命 {equipment.health_bonus}")
 
     def calculate_damage(self, opponent, is_magical=False):
         stat_attack = self.MAT if is_magical else self.ATK
@@ -75,3 +107,16 @@ class Enemy(Character):
         super().__init__(name, max_hp, max_mp, atk, defense, mat, mdf, agi, luk, skill)
         self.exp_reward = exp_reward
         self.gold_reward = gold_reward
+        self.weapon = None
+        self.equipment = []
+
+    def equip_weapon(self, weapon):
+        """敌人装备武器"""
+        self.weapon = weapon
+        self.ATK += weapon.attack_bonus
+
+    def equip_armor(self, equipment):
+        """敌人装备防具"""
+        self.equipment.append(equipment)
+        self.DEF += equipment.defense_bonus
+        self.MaxHP += equipment.health_bonus
