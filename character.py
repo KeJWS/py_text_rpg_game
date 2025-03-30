@@ -67,16 +67,16 @@ class Character:
     def attack(self, opponent):
         damage = self.calculate_damage(opponent)
         opponent.HP -= damage
-        print(f"{self.name} 攻击 {opponent.name}，造成 {damage} 伤害！")
+        print(f"🗡️ {self.name} 攻击 {opponent.name}，造成 {damage} 伤害！")
 
     def use_skill(self, opponent):
         if self.MP >= 10:
             self.MP -= 10
             damage = self.calculate_damage(opponent, is_magical=True)
             opponent.HP -= damage
-            print(f"{self.name} 使用 {self.skill}，造成 {damage} 伤害！ (MP -10)")
+            print(f"✨ {self.name} 释放了技能 {self.skill}，造成 {damage} 伤害！ (MP -10)")
         else:
-            print("MP不足，无法使用技能！")
+            print("❌ 技能释放失败，MP不足！")
             return False
         return True
 
