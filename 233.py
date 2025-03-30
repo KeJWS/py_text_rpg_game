@@ -1,50 +1,80 @@
-import os
+import csv
+from character import Character, Enemy, Weapon, Equipment, Item, Inventory
 
-def clear_screen():
-    """清屏函数，适用于 Windows 和 Linux/macOS"""
-    os.system('cls' if os.name == 'nt' else 'clear')
-
-def display_equipment(player):
-    """显示玩家当前装备"""
-    print(f"\n当前装备：\n武器: {player.weapon or '无'}\n护甲: {player.equipment or '无'}")
-
-def select_equipment(equipment_dict, equipment_type):
-    """通用装备选择逻辑"""
-    print(f"选择{equipment_type}：")
-    for key, item in equipment_dict.items():
-        print(f"{key}: {item}")
+def load_csv_data(filename, object_class, field_mapping):
+    """
+    通用 CSV 解析函数，将 CSV 数据加载为指定类的对象。
+    :param filename: CSV 文件名
+    :param object_class: 目标类
+    :param field_mapping: 字段映射，字典格式 {csv字段: 类属性}
+    :return: 字典或列表，取决于 object_class
+    """
+    data = {} if object_class in [Weapon, Equipment, Item] else []
     
-    choice = input(f"请输入{equipment_type}名称: ")
-    return equipment_dict.get(choice, None)
+    try:
+        with open(filename, newline='', encoding='utf-8') as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                parsed_row = {attr: parse_type(row[csv_field]) for csv_field, (attr, parse_type) in field_mapping.items()}
+                obj = object_class(**parsed_row)
+                if isinstance(data, dict):
+                    data[parsed_row['name']] = obj  # 以名称作为键存储
+                else:
+                    data.append(obj)  # 以列表存储
+    except FileNotFoundError:
+        print(f"⚠️ 文件 {filename} 未找到！")
+    except Exception as e:
+        print(f"❌ 读取 {filename} 时出错: {e}")
+    
+    return data
 
-def change_equipment(player, weapons, armors):
-    """玩家换装交互菜单"""
-    while True:
-        clear_screen()
-        display_equipment(player)
-        
-        print("\n你可以选择换装备：")
-        print("1: 更换武器")
-        print("2: 更换护甲")
-        print("3: 脱下武器")
-        print("4: 脱下护甲")
-        print("5: 脱下所有装备")
-        print("0: 返回游戏")
-        
-        choice = input("请输入你的选择: ")
-        
-        if choice == "1":  # 更换武器
-            weapon = select_equipment(weapons, "武器")
-            player.equip_weapon(weapon) if weapon else print("⚠️ 无效的选择，未更换武器。")
-        elif choice == "2":  # 更换护甲
-            armor = select_equipment(armors, "护甲")
-            player.equip_armor(armor) if armor else print("⚠️ 无效的选择，未更换护甲。")
-        elif choice == "3":  # 脱下武器
-            player.equip_weapon(None)
-        elif choice == "4":  # 脱下护甲
-            player.equip_armor(None)
-        elif choice == "5":  # 脱下所有装备
-            player.equip_weapon(None)
-            player.equip_armor(None)
-        elif choice == "0":  # 退出
-            break
+def parse_enemy_level(level_range):
+    """解析敌人的等级范围"""
+    min_level, max_level = map(int, level_range.split("-"))
+    return min_level, max_level
+
+def load_classes():
+    """加载职业数据"""
+    field_mapping = {
+        'id': ('id', str), 'name': ('name', str), 'max_hp': ('MaxHP', int),
+        'max_mp': ('MaxMP', int), 'atk': ('ATK', int), 'defense': ('DEF', int),
+        'mat': ('MAT', int), 'mdf': ('MDF', int), 'agi': ('AGI', int),
+        'luk': ('LUK', int), 'skill': ('skill', str)
+    }
+    return load_csv_data('classes.csv', Character, field_mapping)
+
+def load_enemies():
+    """加载敌人数据"""
+    field_mapping = {
+        'name': ('name', str), 'max_hp': ('MaxHP', int), 'max_mp': ('MaxMP', int),
+        'atk': ('ATK', int), 'defense': ('DEF', int), 'mat': ('MAT', int),
+        'mdf': ('MDF', int), 'agi': ('AGI', int), 'luk': ('LUK', int),
+        'skill': ('skill', str), 'exp_reward': ('exp_reward', int),
+        'gold_reward': ('gold_reward', int), 'level_range': ('level_range', parse_enemy_level)
+    }
+    enemies = load_csv_data("enemies.csv", Enemy, field_mapping)
+    
+    # 解析等级范围
+    for enemy in enemies:
+        enemy.min_level, enemy.max_level = enemy.level_range
+    return enemies
+
+def load_weapons():
+    """加载武器数据"""
+    field_mapping = {'name': ('name', str), 'attack_bonus': ('attack_bonus', int)}
+    return load_csv_data("weapons.csv", Weapon, field_mapping)
+
+def load_armor():
+    """加载护甲数据"""
+    field_mapping = {
+        'name': ('name', str), 'defense_bonus': ('defense_bonus', int), 'health_bonus': ('health_bonus', int)
+    }
+    return load_csv_data("armor.csv", Equipment, field_mapping)
+
+def load_items():
+    """加载道具数据"""
+    field_mapping = {
+        'id': ('id', str), 'name': ('name', str), 'description': ('description', str),
+        'effect': ('effect', str), 'price': ('price', int)
+    }
+    return load_csv_data("items.csv", Item, field_mapping)

@@ -193,8 +193,8 @@ def main():
         print(f"护甲: {player.equipment}")
 
         print()
-        command = input("q: 退出, w: 换装, b: 背包, m: 商店, a: 战斗 ")
-        if command.lower() == 'q':
+        command = input("e: 退出, w: 换装, b: 背包, m: 商店, a: 战斗 ")
+        if command.lower() == 'e':
             print("游戏结束，再见！")
             break
 
@@ -219,6 +219,7 @@ def main():
                 player.HP = min(player.MaxHP, player.HP + int(player.MaxHP*0.25))
                 player.MP = min(player.MaxMP, player.MP + int(player.MaxMP*0.25))
                 print("你恢复了一部分生命值和魔法值，准备迎接下一个挑战！")
+                input("\n按 Enter 继续...")
 
         clear_screen()
         print("干嘛呢？")
