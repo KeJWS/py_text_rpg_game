@@ -37,7 +37,7 @@ class Character:
         self.gold = 0
         self.weapon = weapon
         self.equipment = equipment
-        self.inventory = Inventory()  # 添加背包
+        self.inventory = Inventory()
 
     def equip_weapon(self, weapon):
         """装备或脱下武器"""

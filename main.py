@@ -1,4 +1,3 @@
-import csv
 import random
 import os
 from game_data import load_classes, load_enemies, load_weapons, load_armor, load_items
@@ -181,7 +180,8 @@ def main():
     armors = load_armor()
 
     while player.HP > 0:
-        print(f"\n\033[33m当前金币: {player.gold}\033[0m")
+        print(f"\n{player.name}")
+        print(f"\033[33m当前金币: {player.gold}\033[0m")
         print(f"LV: {player.level}")
         print(f"\033[31mHP: {player.HP}/{player.MaxHP}\033[0m  MP: {player.MP}/{player.MaxMP}")
         print(f"EXP: {player.exp}/{player.exp_to_next}")
@@ -202,11 +202,18 @@ def main():
             external_change_equipment(player, weapons, armors)
 
         elif command == "b":
-            player.inventory.view_inventory(items)
-            use_command = input("输入物品 ID 以使用, 或按 Enter 退出: ")
-            if use_command.isdigit() and int(use_command) in items:
-                player.inventory.use_item(int(use_command), player, items)
-            input("\n按 Enter 继续...")
+            clear_screen()
+            while True:
+                print(f"{player.name}")
+                print(f"\033[31mHP: {player.HP}/{player.MaxHP}\033[0m  MP: {player.MP}/{player.MaxMP}")
+                player.inventory.view_inventory(items)
+                use_command = input("输入物品 ID 以使用, 或输入 q 退出: ")
+                if use_command == "q":
+                    break
+                elif use_command.isdigit() and int(use_command) in items:
+                    player.inventory.use_item(int(use_command), player, items)
+                input("\n按 Enter 继续...")
+                clear_screen()
 
         elif command == "m":
             clear_screen()
