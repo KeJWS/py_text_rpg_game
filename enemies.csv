@@ -1,0 +1,4 @@
+name,max_hp,max_mp,atk,defense,mat,mdf,agi,luk,skill,exp_reward,gold_reward
+哥布林,70,20,12,5,8,4,9,6,挥砍,20,10
+狼,80,15,14,6,5,3,12,7,撕咬,25,20
+骷髅战士,100,10,16,10,6,5,8,4,重击,30,30
