@@ -1,8 +1,8 @@
 import csv
 import random
 import os
-from game_data import load_classes, load_enemies, load_weapons, load_armor
-from character import Character, Enemy, Weapon, Equipment
+from game_data import load_classes, load_enemies, load_weapons, load_armor, load_items
+from character import Character, Enemy, Weapon, Equipment, Item, Inventory, Shop
 from change_equipment import change_equipment
 
 class Battle:
@@ -66,6 +66,7 @@ class Battle:
         escape_chance = min(90, max(10, self.player.AGI * 3))  # 逃跑概率：10% - 90%
         if random.randint(1, 100) <= escape_chance:
             print("🏃 你成功逃跑了！")
+            input("\n按 Enter 继续...")
             return True
         else:
             print(f"🚫 {self.enemy.name} 阻止了你的逃跑！")
@@ -148,12 +149,31 @@ def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
 def external_change_equipment(player, weapons, armors):
+    clear_screen()
     print("触发换装功能")
     change_equipment(player, weapons, armors)
+
+def shop_menu(player, shop):
+    while True:
+        shop.display_items()
+        print(f"\n💰 你的金币: {player.gold} G")
+        choice = input("🔹 请输入要购买的物品 ID（输入 q 退出）: ")
+
+        if choice == "q":
+            break
+        elif choice.isdigit() and int(choice) in shop.items_for_sale:
+            clear_screen()
+            shop.buy_item(player, int(choice))
+        else:
+            clear_screen()
+            print("⚠️ 请输入正确的物品 ID！")
 
 def main():
     print("欢迎来到文字RPG冒险！")
     player = choose_class()
+    items = load_items()
+    shop = Shop(items)
+
     print(f"你选择了 {player.name}，冒险开始！")
 
     # 加载武器和护甲
@@ -161,7 +181,7 @@ def main():
     armors = load_armor()
 
     while player.HP > 0:
-        print(f"\n当前金币: {player.gold}")
+        print(f"\n\033[33m当前金币: {player.gold}\033[0m")
         print(f"LV: {player.level}")
         print(f"\033[31mHP: {player.HP}/{player.MaxHP}\033[0m  MP: {player.MP}/{player.MaxMP}")
         print(f"EXP: {player.exp}/{player.exp_to_next}")
@@ -173,19 +193,35 @@ def main():
         print(f"护甲: {player.equipment}")
 
         print()
-        command = input("q: 退出, w: 换装, Enter: 战斗 ")
+        command = input("q: 退出, w: 换装, b: 背包, m: 商店, a: 战斗 ")
         if command.lower() == 'q':
             print("游戏结束，再见！")
             break
 
-        if command.lower() == 'w':
+        elif command.lower() == 'w':
             external_change_equipment(player, weapons, armors)
 
-        battle(player)
-        if player.HP > 0:
-            player.HP = min(player.MaxHP, player.HP + int(player.MaxHP*0.25))
-            player.MP = min(player.MaxMP, player.MP + int(player.MaxMP*0.25))
-            print("你恢复了一部分生命值和魔法值，准备迎接下一个挑战！")
+        elif command == "b":
+            player.inventory.view_inventory(items)
+            use_command = input("输入物品 ID 以使用, 或按 Enter 退出: ")
+            if use_command.isdigit() and int(use_command) in items:
+                player.inventory.use_item(int(use_command), player, items)
+            input("\n按 Enter 继续...")
+
+        elif command == "m":
+            clear_screen()
+            shop_menu(player, shop)
+
+        elif command == "a":
+            clear_screen()
+            battle(player)
+            if player.HP > 0:
+                player.HP = min(player.MaxHP, player.HP + int(player.MaxHP*0.25))
+                player.MP = min(player.MaxMP, player.MP + int(player.MaxMP*0.25))
+                print("你恢复了一部分生命值和魔法值，准备迎接下一个挑战！")
+
+        clear_screen()
+        print("干嘛呢？")
 
 if __name__ == "__main__":
     main()

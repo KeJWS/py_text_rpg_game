@@ -37,6 +37,7 @@ class Character:
         self.gold = 0
         self.weapon = weapon
         self.equipment = equipment
+        self.inventory = Inventory()  # 添加背包
 
     def equip_weapon(self, weapon):
         """装备或脱下武器"""
@@ -142,3 +143,94 @@ class Enemy(Character):
         self.equipment = equipment
         self.DEF += equipment.defense_bonus
         self.MaxHP += equipment.health_bonus
+
+class Item:
+    def __init__(self, item_id, name, item_type, effect, value, price):
+        self.id = int(item_id)
+        self.name = name
+        self.type = item_type  # 恢复 / 战斗 / 任务
+        self.effect = effect  # HP / MP / ATK / DEF
+        self.value = int(value)  # 数值
+        self.price = int(price)  # 价格
+
+    def use(self, target):
+        """使用物品，作用于目标角色"""
+        if self.type == "恢复":
+            if self.effect == "HP":
+                target.HP = min(target.MaxHP, target.HP + self.value)
+                print(f"✨ {target.name} 使用了 {self.name}，恢复 {self.value} 生命值！")
+            elif self.effect == "MP":
+                target.MP = min(target.MaxMP, target.MP + self.value)
+                print(f"🔮 {target.name} 使用了 {self.name}，恢复 {self.value} 魔法值！")
+        elif self.type == "战斗":
+            setattr(target, self.effect, getattr(target, self.effect) + self.value)
+            print(f"🔥 {target.name} 使用了 {self.name}，{self.effect} 提高了 {self.value}！")
+
+class Inventory:
+    def __init__(self):
+        self.items = {}  # 存储物品 {item_id: 数量}
+
+    def add_item(self, item, quantity=1):
+        """添加物品到背包"""
+        if item.id in self.items:
+            self.items[item.id] += quantity
+        else:
+            self.items[item.id] = quantity
+        print(f"🎒 获得物品: {item.name} x{quantity}")
+
+    def remove_item(self, item, quantity=1):
+        """移除物品"""
+        if item.id in self.items:
+            if self.items[item.id] > quantity:
+                self.items[item.id] -= quantity
+            else:
+                del self.items[item.id]
+            print(f"🗑️ 使用了 {item.name} x{quantity}")
+        else:
+            print("⚠️ 没有这个物品！")
+
+    def view_inventory(self, item_list):
+        """查看背包"""
+        print("\n🎒 你的背包:")
+        if not self.items:
+            print("（空）")
+        for item_id, quantity in self.items.items():
+            item = item_list[item_id]
+            print(f"{item.name} x{quantity} ({item.type})")
+
+    def use_item(self, item_id, target, item_list):
+        """使用背包中的物品"""
+        if item_id in self.items:
+            item = item_list[item_id]
+            item.use(target)
+            self.remove_item(item)
+        else:
+            print("⚠️ 你没有这个物品！")
+
+class Shop:
+    def __init__(self, items):
+        """初始化商店，选择可出售的物品"""
+        self.items_for_sale = {id_: item for id_, item in items.items()}
+
+    def display_items(self):
+        """显示商店可购买的商品"""
+        print("\n🛒 商店：")
+        print("ID   |   物品名      效果        效果值      价格")
+        print("-" * 60)
+        for item in self.items_for_sale.values():
+            print(f"{item.id:2} |   {item.name:6}      {item.effect:3}     +{item.value:3}      {item.price:3} G")
+        print("-" * 60)
+
+    def buy_item(self, player, item_id):
+        """购买物品"""
+        if item_id in self.items_for_sale:
+            item = self.items_for_sale[item_id]
+            if player.gold >= item.price:
+                player.gold -= item.price
+                player.inventory.add_item(item)
+                print(f"✅ 你成功购买了 {item.name}！")
+            else:
+                print("⚠️ 你的金币不足！")
+        else:
+            print("⚠️ 物品不存在！")
+

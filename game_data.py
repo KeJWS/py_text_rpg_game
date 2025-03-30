@@ -1,5 +1,5 @@
 import csv
-from character import Character, Enemy, Weapon, Equipment
+from character import Character, Enemy, Weapon, Equipment, Item, Inventory
 
 def load_classes():
     classes = {}
@@ -66,3 +66,13 @@ def load_armor(filename="armor.csv"):
             health_bonus = int(row['health_bonus'])
             armors[name] = Equipment(name, defense_bonus, health_bonus)
     return armors
+
+def load_items():
+    items = {}
+    with open("items.csv", encoding="utf-8") as file:
+        reader = csv.reader(file)
+        next(reader)
+        for row in reader:
+            item = Item(*row)
+            items[item.id] = item
+        return items

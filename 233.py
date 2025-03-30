@@ -1,51 +1,50 @@
+import os
+
+def clear_screen():
+    """清屏函数，适用于 Windows 和 Linux/macOS"""
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+def display_equipment(player):
+    """显示玩家当前装备"""
+    print(f"\n当前装备：\n武器: {player.weapon or '无'}\n护甲: {player.equipment or '无'}")
+
+def select_equipment(equipment_dict, equipment_type):
+    """通用装备选择逻辑"""
+    print(f"选择{equipment_type}：")
+    for key, item in equipment_dict.items():
+        print(f"{key}: {item}")
+    
+    choice = input(f"请输入{equipment_type}名称: ")
+    return equipment_dict.get(choice, None)
+
 def change_equipment(player, weapons, armors):
-    """让玩家换装备"""
-    print("\n当前装备：")
-    print(f"武器: {player.weapon}")
-    print(f"护甲: {player.equipment}")
-
-    print("\n你可以选择换装备：")
-    print("1: 更换武器")
-    print("2: 更换护甲")
-    print("3: 脱下武器")
-    print("4: 脱下护甲")
-    print("5: 脱下所有")
-
-    choice = input("请输入你的选择，默认不更换: ")
-
-    if choice == "1":
-        print("选择武器：")
-        for key, weapon in weapons.items():
-            print(f"{key}: {weapon}")
-        weapon_choice = input("请输入武器名称: ")
-        weapon = weapons.get(weapon_choice, None)
-        if weapon:
-            player.equip_weapon(weapon)
-        else:
-            print("无效的武器选择，默认选择长剑。")
-            player.equip_weapon(weapons.get("长剑"))
-
-    elif choice == "2":
-        print("选择护甲：")
-        for key, armor in armors.items():
-            print(f"{key}: {armor}")
-        armor_choice = input("请输入护甲名称: ")
-        armor = armors.get(armor_choice, None)
-        if armor:
-            player.equip_armor(armor)
-        else:
-            print("无效的护甲选择，默认选择铁甲。")
-            player.equip_armor(armors.get("铁甲"))
-
-    elif choice == "3":
-        player.equip_weapon(None)
-
-    elif choice == "4":
-        player.equip_armor(None)
-
-    elif choice == "5":
-        player.equip_weapon(None)
-        player.equip_armor(None)
-
-    else:
-        print("未做更换。")
+    """玩家换装交互菜单"""
+    while True:
+        clear_screen()
+        display_equipment(player)
+        
+        print("\n你可以选择换装备：")
+        print("1: 更换武器")
+        print("2: 更换护甲")
+        print("3: 脱下武器")
+        print("4: 脱下护甲")
+        print("5: 脱下所有装备")
+        print("0: 返回游戏")
+        
+        choice = input("请输入你的选择: ")
+        
+        if choice == "1":  # 更换武器
+            weapon = select_equipment(weapons, "武器")
+            player.equip_weapon(weapon) if weapon else print("⚠️ 无效的选择，未更换武器。")
+        elif choice == "2":  # 更换护甲
+            armor = select_equipment(armors, "护甲")
+            player.equip_armor(armor) if armor else print("⚠️ 无效的选择，未更换护甲。")
+        elif choice == "3":  # 脱下武器
+            player.equip_weapon(None)
+        elif choice == "4":  # 脱下护甲
+            player.equip_armor(None)
+        elif choice == "5":  # 脱下所有装备
+            player.equip_weapon(None)
+            player.equip_armor(None)
+        elif choice == "0":  # 退出
+            break
