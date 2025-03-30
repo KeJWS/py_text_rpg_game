@@ -3,6 +3,7 @@ import random
 import os
 from game_data import load_classes, load_enemies, load_weapons, load_armor
 from character import Character, Enemy, Weapon, Equipment
+from change_equipment import change_equipment
 
 class Battle:
     def __init__(self, player, enemy):
@@ -59,7 +60,7 @@ class Battle:
             damage //= 2  # 玩家防御时伤害减少50%
             print(f"🛡️ 你成功防御，伤害减少为 {damage}！")
         self.player.HP -= damage
-        print(f"🔥 {enemy.name} 攻击了你，造成 {damage} 伤害！")
+        print(f"🔥 {enemy.name} 攻击了你，造成 \033[33m{damage}\033[0m 伤害！")
 
     def try_escape(self):
         escape_chance = min(90, max(10, self.player.AGI * 3))  # 逃跑概率：10% - 90%
@@ -74,8 +75,8 @@ class Battle:
         print(f"\n⚔️ 你遇到了 {self.enemy.name}！⚔️")
         while self.player.HP > 0 and self.enemy.HP > 0:
             print(f"\n==== 🌀 第 {self.turn_count} 回合 ====")
-            print(f"💖 你的生命值: {self.player.HP}/{self.player.MaxHP} | MP: {self.player.MP}/{self.player.MaxMP}")
-            print(f"💀 {self.enemy.name} 的生命值: {self.enemy.HP}/{self.enemy.MaxHP} | MP: {self.enemy.MP}/{self.enemy.MaxMP}")
+            print(f"💖 你的生命值: \033[31m{self.player.HP}/{self.player.MaxHP}\033[0m | MP: {self.player.MP}/{self.player.MaxMP}")
+            print(f"💀 {self.enemy.name} 的生命值: \033[32m{self.enemy.HP}/{self.enemy.MaxHP}\033[0m | MP: {self.enemy.MP}/{self.enemy.MaxMP}")
             print("🔄 行动顺序:", " -> ".join([c.name for c in self.turn_order]))
             print()
 
@@ -102,7 +103,7 @@ class Battle:
             self.player.gain_exp(self.enemy.exp_reward)
             self.player.gain_gold(self.enemy.gold_reward)
         else:
-            print("💀 你被击败了，游戏结束。")
+            print("💀 \033[31m你被击败了，游戏结束。\033[0m")
 
         input("\n按 Enter 继续...")
         clear_screen()
@@ -146,6 +147,10 @@ def choose_class():
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
+def external_change_equipment(player, weapons, armors):
+    print("触发换装功能")
+    change_equipment(player, weapons, armors)
+
 def main():
     print("欢迎来到文字RPG冒险！")
     player = choose_class()
@@ -155,51 +160,27 @@ def main():
     weapons = load_weapons()
     armors = load_armor()
 
-    # 给玩家装备一个武器和一件装备
-    print("选择武器：")
-    for key, weapon in weapons.items():
-        print(f"{key}: {weapon}")
-    weapon_choice = input("请输入武器名称: ")
-    weapon = weapons.get(weapon_choice, None)
-    if weapon:
-        player.equip_weapon(weapon)
-    else:
-        print("无效的武器选择，默认选择长剑。")
-        player.equip_weapon(weapons.get("长剑"))
-
-    print("选择护甲：")
-    for key, armor in armors.items():
-        print(f"{key}: {armor}")
-    armor_choice = input("请输入护甲名称: ")
-    armor = armors.get(armor_choice, None)
-    clear_screen()
-    if armor:
-        player.equip_armor(armor)
-    else:
-        print("无效的护甲选择，默认选择铁甲。")
-        player.equip_armor(armors.get("铁甲"))
-
     while player.HP > 0:
         print(f"\n当前金币: {player.gold}")
         print(f"LV: {player.level}")
-        print(f"HP: {player.HP}/{player.MaxHP}  MP: {player.MP}/{player.MaxMP}")
+        print(f"\033[31mHP: {player.HP}/{player.MaxHP}\033[0m  MP: {player.MP}/{player.MaxMP}")
         print(f"EXP: {player.exp}/{player.exp_to_next}")
         print(f"暴击率: {player.LUK/2}%")
         print(f"ATK: {player.ATK}   DEF: {player.DEF}")
         print(f"MAT: {player.MAT}   MDF: {player.MDF}")
         print(f"AGI: {player.AGI}   LUK: {player.LUK}")
         print(f"武器: {player.weapon}")
-
-        if player.equipment:
-            print("护甲: " + ", ".join(str(item) for item in player.equipment))
-        else:
-            print("护甲: None")
+        print(f"护甲: {player.equipment}")
 
         print()
-        command = input("输入 'q' 退出游戏, 按 Enter 继续战斗: ")
+        command = input("q: 退出, w: 换装, Enter: 战斗 ")
         if command.lower() == 'q':
             print("游戏结束，再见！")
             break
+
+        if command.lower() == 'w':
+            external_change_equipment(player, weapons, armors)
+
         battle(player)
         if player.HP > 0:
             player.HP = min(player.MaxHP, player.HP + int(player.MaxHP*0.25))

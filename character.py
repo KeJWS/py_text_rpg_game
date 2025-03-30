@@ -18,7 +18,7 @@ class Equipment:
         return f"{self.name} (DEF + {self.defense_bonus}, MaxHP + {self.health_bonus})"
 
 class Character:
-    def __init__(self, name, max_hp, max_mp, atk, defense, mat, mdf, agi, luk, skill):
+    def __init__(self, name, max_hp, max_mp, atk, defense, mat, mdf, agi, luk, skill, weapon=None, equipment=None):
         self.name = name
         self.MaxHP = max_hp
         self.MaxMP = max_mp
@@ -35,21 +35,41 @@ class Character:
         self.exp = 0
         self.exp_to_next = 50
         self.gold = 0
-        self.weapon = None
-        self.equipment = []
+        self.weapon = weapon
+        self.equipment = equipment
 
     def equip_weapon(self, weapon):
-        """装备武器"""
-        self.weapon = weapon
-        self.ATK += weapon.attack_bonus
-        print(f"{self.name} 装备了武器 {weapon.name}，攻击力增加 {weapon.attack_bonus}")
+        """装备或脱下武器"""
+        if weapon is None:
+            if self.weapon:
+                print(f"{self.name} 脱下了 {self.weapon.name}。ATK-{self.weapon.attack_bonus}")
+                self.ATK -= self.weapon.attack_bonus
+            self.weapon = None
+            print(f"{self.name} 现在没有武器。")
+        else:
+            if self.weapon:
+                self.ATK -= self.weapon.attack_bonus
+            self.weapon = weapon
+            self.ATK += weapon.attack_bonus
+            print(f"{self.name} 装备了 {weapon.name}，ATK+{weapon.attack_bonus}。")
 
     def equip_armor(self, equipment):
-        """装备防具"""
-        self.equipment.append(equipment)
-        self.DEF += equipment.defense_bonus
-        self.MaxHP += equipment.health_bonus
-        print(f"{self.name} 装备了 {equipment.name}，增加了防御 {equipment.defense_bonus}，生命 {equipment.health_bonus}")
+        """装备或脱下防具"""
+        if equipment is None:
+            if self.equipment:
+                print(f"{self.name} 脱下了 {self.equipment.name}。DEF-{self.equipment.defense_bonus}, MaxHP-{self.equipment.health_bonus}")
+                self.DEF -= self.equipment.defense_bonus
+                self.MaxHP -= self.equipment.health_bonus
+            self.equipment = None
+            print(f"{self.name} 现在没有防具。")
+        else:
+            if self.equipment:
+                self.DEF -= self.equipment.defense_bonus
+                self.MaxHP -= self.equipment.health_bonus
+            self.equipment = equipment
+            self.DEF += equipment.defense_bonus
+            self.MaxHP += equipment.health_bonus
+            print(f"{self.name} 装备了 {equipment.name}，DEF+{equipment.defense_bonus}, MaxHP+{equipment.health_bonus}")
 
     def calculate_damage(self, opponent, is_magical=False):
         stat_attack = self.MAT if is_magical else self.ATK
@@ -67,7 +87,7 @@ class Character:
     def attack(self, opponent):
         damage = self.calculate_damage(opponent)
         opponent.HP -= damage
-        print(f"🗡️ {self.name} 攻击 {opponent.name}，造成 {damage} 伤害！")
+        print(f"🗡️ {self.name} 攻击 {opponent.name}，造成 \033[33m{damage}\033[0m 伤害！")
 
     def use_skill(self, opponent):
         if self.MP >= 10:
@@ -99,7 +119,7 @@ class Character:
         for stat, inc in zip(stats, increments):
             setattr(self, stat, getattr(self, stat) + inc)
         self.HP, self.MP = self.MaxHP, self.MaxMP
-        print(f"{self.name} 升级到 {self.level} 级！")
+        print(f"\033[33m{self.name} 升级到 {self.level} 级！\033[0m")
         print(f"{self.name}: (MaxHP: {self.MaxHP}, MaxMP: {self.MaxMP}, ATK: {self.ATK}, DEF: {self.DEF}, MAT: {self.MAT}, MDF: {self.MDF}, AGI: {self.AGI}, LUK: {self.LUK}, 技能: {self.skill})")
 
 class Enemy(Character):
@@ -108,7 +128,7 @@ class Enemy(Character):
         self.exp_reward = exp_reward
         self.gold_reward = gold_reward
         self.weapon = None
-        self.equipment = []
+        self.equipment = None
         self.min_level = min_level
         self.max_level = max_level
 
@@ -119,6 +139,6 @@ class Enemy(Character):
 
     def equip_armor(self, equipment):
         """敌人装备防具"""
-        self.equipment.append(equipment)
+        self.equipment = equipment
         self.DEF += equipment.defense_bonus
         self.MaxHP += equipment.health_bonus

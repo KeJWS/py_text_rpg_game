@@ -1,44 +1,51 @@
-class Enemy:
-    def __init__(self, name, max_hp, max_mp, atk, defense, mat, mdf, agi, luk, skill, exp_reward, gold_reward, min_level=1, max_level=99):
-        self.name = name
-        self.MaxHP = max_hp
-        self.HP = max_hp
-        self.MaxMP = max_mp
-        self.MP = max_mp
-        self.ATK = atk
-        self.DEF = defense
-        self.MAT = mat
-        self.MDF = mdf
-        self.AGI = agi
-        self.LUK = luk
-        self.skill = skill
-        self.exp_reward = exp_reward
-        self.gold_reward = gold_reward
-        self.min_level = min_level
-        self.max_level = max_level
+def change_equipment(player, weapons, armors):
+    """让玩家换装备"""
+    print("\n当前装备：")
+    print(f"武器: {player.weapon}")
+    print(f"护甲: {player.equipment}")
 
-    def calculate_damage(self, opponent, is_magical=False):
-        """计算敌人攻击玩家的伤害"""
-        stat_attack = self.MAT if is_magical else self.ATK
-        stat_defense = opponent.MDF if is_magical else opponent.DEF
-        base_damage = max(1, stat_attack * 4 - stat_defense * 2)  # 计算伤害，确保不低于1
-        return self.apply_critical_hit(base_damage)
+    print("\n你可以选择换装备：")
+    print("1: 更换武器")
+    print("2: 更换护甲")
+    print("3: 脱下武器")
+    print("4: 脱下护甲")
+    print("5: 脱下所有")
 
-    def apply_critical_hit(self, damage):
-        """计算暴击伤害"""
-        if random.randint(1, 100) <= self.LUK / 2:  # 根据敌人的运气（LUK）决定暴击
-            crit_multiplier = random.choice([1.5, 2])
-            print(f"{self.name} 造成暴击！伤害 x{crit_multiplier}")
-            return int(damage * crit_multiplier)
-        return damage
+    choice = input("请输入你的选择，默认不更换: ")
 
-    def equip_weapon(self, weapon):
-        """敌人装备武器"""
-        self.weapon = weapon
-        self.ATK += weapon.attack_bonus
+    if choice == "1":
+        print("选择武器：")
+        for key, weapon in weapons.items():
+            print(f"{key}: {weapon}")
+        weapon_choice = input("请输入武器名称: ")
+        weapon = weapons.get(weapon_choice, None)
+        if weapon:
+            player.equip_weapon(weapon)
+        else:
+            print("无效的武器选择，默认选择长剑。")
+            player.equip_weapon(weapons.get("长剑"))
 
-    def equip_armor(self, equipment):
-        """敌人装备防具"""
-        self.equipment.append(equipment)
-        self.DEF += equipment.defense_bonus
-        self.MaxHP += equipment.health_bonus
+    elif choice == "2":
+        print("选择护甲：")
+        for key, armor in armors.items():
+            print(f"{key}: {armor}")
+        armor_choice = input("请输入护甲名称: ")
+        armor = armors.get(armor_choice, None)
+        if armor:
+            player.equip_armor(armor)
+        else:
+            print("无效的护甲选择，默认选择铁甲。")
+            player.equip_armor(armors.get("铁甲"))
+
+    elif choice == "3":
+        player.equip_weapon(None)
+
+    elif choice == "4":
+        player.equip_armor(None)
+
+    elif choice == "5":
+        player.equip_weapon(None)
+        player.equip_armor(None)
+
+    else:
+        print("未做更换。")
