@@ -42,3 +42,5 @@ class Enemy:
         self.equipment.append(equipment)
         self.DEF += equipment.defense_bonus
         self.MaxHP += equipment.health_bonus
+
+print()
