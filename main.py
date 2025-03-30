@@ -98,11 +98,11 @@ class Battle:
 
     def battle_result(self):
         if self.player.HP > 0:
-            print(f"你击败了 {self.enemy.name}！")
+            print(f"🏆 你击败了 {self.enemy.name}！")
             self.player.gain_exp(self.enemy.exp_reward)
             self.player.gain_gold(self.enemy.gold_reward)
         else:
-            print("你被击败了，游戏结束。")
+            print("💀 你被击败了，游戏结束。")
 
         input("\n按 Enter 继续...")
         clear_screen()
