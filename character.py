@@ -1,7 +1,10 @@
+import game_data
+
 import random
 
 class Weapon:
-    def __init__(self, name, attack_bonus):
+    def __init__(self, id, name, attack_bonus):
+        self.id = id
         self.name = name
         self.attack_bonus = attack_bonus
 
@@ -9,7 +12,8 @@ class Weapon:
         return f"{self.name} (ATK + {self.attack_bonus})"
 
 class Equipment:
-    def __init__(self, name, defense_bonus, health_bonus):
+    def __init__(self, id, name, defense_bonus, health_bonus):
+        self.id = id
         self.name = name
         self.defense_bonus = defense_bonus
         self.health_bonus = health_bonus
@@ -49,10 +53,14 @@ class Character:
             print(f"{self.name} 现在没有武器。")
         else:
             if self.weapon:
+                print(f"{self.name} 脱下了 {self.weapon.name}。ATK-{self.weapon.attack_bonus}")
                 self.ATK -= self.weapon.attack_bonus
-            self.weapon = weapon
-            self.ATK += weapon.attack_bonus
-            print(f"{self.name} 装备了 {weapon.name}，ATK+{weapon.attack_bonus}。")
+            if weapon.id in game_data.load_weapons():
+                self.weapon = weapon
+                self.ATK += weapon.attack_bonus
+                print(f"{self.name} 装备了 {weapon.name}，ATK+{weapon.attack_bonus}。")
+            else:
+                print("无效的护甲ID！")
 
     def equip_armor(self, equipment):
         """装备或脱下防具"""
@@ -65,12 +73,21 @@ class Character:
             print(f"{self.name} 现在没有防具。")
         else:
             if self.equipment:
+                print(f"{self.name} 脱下了 {self.equipment.name}。DEF-{self.equipment.defense_bonus}, MaxHP-{self.equipment.health_bonus}")
                 self.DEF -= self.equipment.defense_bonus
                 self.MaxHP -= self.equipment.health_bonus
-            self.equipment = equipment
-            self.DEF += equipment.defense_bonus
-            self.MaxHP += equipment.health_bonus
-            print(f"{self.name} 装备了 {equipment.name}，DEF+{equipment.defense_bonus}, MaxHP+{equipment.health_bonus}")
+            if equipment.id in game_data.load_armor():
+                self.equipment = equipment
+                self.DEF += equipment.defense_bonus
+                self.MaxHP += equipment.health_bonus
+                print(f"{self.name} 装备了 {equipment.name}，DEF+{equipment.defense_bonus}, MaxHP+{equipment.health_bonus}")
+            else:
+                print("无效的护甲ID！")
+
+    def attack(self, opponent):
+        damage = self.calculate_damage(opponent)
+        opponent.HP -= damage
+        print(f"🗡️ {self.name} 攻击 {opponent.name}，造成 \033[33m{damage}\033[0m 伤害！")
 
     def calculate_damage(self, opponent, is_magical=False):
         stat_attack = self.MAT if is_magical else self.ATK
@@ -84,11 +101,6 @@ class Character:
             print(f"{self.name} 造成暴击！伤害 x{crit_multiplier}")
             return int(damage * crit_multiplier)
         return damage
-
-    def attack(self, opponent):
-        damage = self.calculate_damage(opponent)
-        opponent.HP -= damage
-        print(f"🗡️ {self.name} 攻击 {opponent.name}，造成 \033[33m{damage}\033[0m 伤害！")
 
     def use_skill(self, opponent):
         if self.MP >= 10:
@@ -150,8 +162,8 @@ class Item:
         self.name = name
         self.type = item_type  # 恢复 / 战斗 / 任务
         self.effect = effect  # HP / MP / ATK / DEF
-        self.value = int(value)  # 数值
-        self.price = int(price)  # 价格
+        self.value = int(value)
+        self.price = int(price)
 
     def use(self, target):
         """使用物品，作用于目标角色"""

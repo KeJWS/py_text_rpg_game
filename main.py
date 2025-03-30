@@ -4,6 +4,9 @@ from game_data import load_classes, load_enemies, load_weapons, load_armor, load
 from character import Character, Enemy, Weapon, Equipment, Item, Inventory, Shop
 from change_equipment import change_equipment
 
+def clear_screen():
+    os.system('cls' if os.name == 'nt' else 'clear')
+
 class Battle:
     def __init__(self, player, enemy):
         self.player = player
@@ -108,27 +111,6 @@ class Battle:
         input("\n按 Enter 继续...")
         clear_screen()
 
-def battle(player):
-    enemy = get_random_enemy(player.level)
-    battle_instance = Battle(player, enemy)
-    battle_instance.process_battle()
-
-# 在游戏开始时加载敌人
-enemies = load_enemies()
-
-def get_random_enemy(player_level):
-    # 按照玩家等级筛选合适的敌人
-    available_enemies = [enemy for enemy in enemies if enemy.min_level <= player_level <= enemy.max_level]
-    
-    if not available_enemies:
-        print("⚠️ 没有找到适合当前等级的敌人，默认返回最低等级敌人！")
-        return min(enemies, key=lambda e: e.min_level)  # 返回最低等级敌人，避免错误
-
-    enemy = random.choice(available_enemies)  # 随机选择适合玩家等级的敌人
-    enemy.HP = enemy.MaxHP
-    enemy.MP = enemy.MaxMP
-    return enemy
-
 def choose_class():
     classes = load_classes()
     print("选择你的职业:")
@@ -136,20 +118,25 @@ def choose_class():
         print(f"{key}: {char.name} (MaxHP: {char.MaxHP}, MaxMP: {char.MaxMP}, ATK: {char.ATK}, DEF: {char.DEF}, MAT: {char.MAT}, MDF: {char.MDF}, AGI: {char.AGI}, LUK: {char.LUK}, 技能: {char.skill})")
 
     choice = input("请输入对应的数字: ")
-    if choice in classes:
-        clear_screen()
-        return classes[choice]
-    else:
-        clear_screen()
-        print("无效的职业选择，默认选择战士。")
-        return classes.get("1")
+    clear_screen()
+    return classes.get(choice, classes["1"])  # 默认选择战士
 
-def clear_screen():
-    os.system('cls' if os.name == 'nt' else 'clear')
+def get_random_enemy(player_level):
+    """根据玩家等级随机选择合适的敌人"""
+    enemies = load_enemies()
+    available_enemies = [e for e in enemies if e.min_level <= player_level <= e.max_level]
+    enemy = random.choice(available_enemies) if available_enemies else min(enemies, key=lambda e: e.min_level)  # 返回最低等级敌人，避免错误
+    enemy.HP, enemy.MP = enemy.MaxHP, enemy.MaxMP
+    return enemy
+
+def battle(player):
+    enemy = get_random_enemy(player.level)
+    battle_instance = Battle(player, enemy)
+    battle_instance.process_battle()
 
 def external_change_equipment(player, weapons, armors):
     clear_screen()
-    print("触发换装功能")
+    print("更换装备")
     change_equipment(player, weapons, armors)
 
 def shop_menu(player, shop):
@@ -157,7 +144,6 @@ def shop_menu(player, shop):
         shop.display_items()
         print(f"\n💰 你的金币: {player.gold} G")
         choice = input("🔹 请输入要购买的物品 ID（输入 q 退出）: ")
-
         if choice == "q":
             break
         elif choice.isdigit() and int(choice) in shop.items_for_sale:
@@ -167,30 +153,28 @@ def shop_menu(player, shop):
             clear_screen()
             print("⚠️ 请输入正确的物品 ID！")
 
+def display_player_info(player):
+    """显示玩家当前状态"""
+    print(f"\n{player.name} (LV: {player.level})")
+    print(f"\033[31mHP: {player.HP}/{player.MaxHP}\033[0m  MP: {player.MP}/{player.MaxMP}")
+    print(f"EXP: {player.exp}/{player.exp_to_next}  |  💰 \033[33m金币: {player.gold} G\033[0m")
+    print(f"ATK: {player.ATK}   DEF: {player.DEF}   MAT: {player.MAT}   MDF: {player.MDF}")
+    print(f"AGI: {player.AGI}   LUK: {player.LUK}")
+    print(f"暴击率: {player.LUK/2}%")
+    print(f"🔪 武器: {player.weapon}")
+    print(f"🛡️ 护甲: {player.equipment}")
+
 def main():
     print("欢迎来到文字RPG冒险！")
     player = choose_class()
     items = load_items()
     shop = Shop(items)
+    weapons, armors = load_weapons(), load_armor()
 
     print(f"你选择了 {player.name}，冒险开始！")
 
-    # 加载武器和护甲
-    weapons = load_weapons()
-    armors = load_armor()
-
     while player.HP > 0:
-        print(f"\n{player.name}")
-        print(f"\033[33m当前金币: {player.gold}\033[0m")
-        print(f"LV: {player.level}")
-        print(f"\033[31mHP: {player.HP}/{player.MaxHP}\033[0m  MP: {player.MP}/{player.MaxMP}")
-        print(f"EXP: {player.exp}/{player.exp_to_next}")
-        print(f"暴击率: {player.LUK/2}%")
-        print(f"ATK: {player.ATK}   DEF: {player.DEF}")
-        print(f"MAT: {player.MAT}   MDF: {player.MDF}")
-        print(f"AGI: {player.AGI}   LUK: {player.LUK}")
-        print(f"武器: {player.weapon}")
-        print(f"护甲: {player.equipment}")
+        display_player_info(player)
 
         print()
         command = input("e: 退出, w: 换装, b: 背包, m: 商店, a: 战斗 ")
