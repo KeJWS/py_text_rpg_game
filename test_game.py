@@ -23,16 +23,24 @@ class Character:
 
     def calculate_damage(self, opponent, is_magical=False):
         if is_magical:
-            damage = max(1, self.MAT * 4 - opponent.MDF * 2)
+            base_damage = max(1, self.MAT * 4 - opponent.MDF * 2)
         else:
-            damage = max(1, self.ATK * 4 - opponent.DEF * 2)
+            base_damage = max(1, self.ATK * 4 - opponent.DEF * 2)
+        return self.apply_critical_hit(base_damage)
+
+    def apply_critical_hit(self, damage):
+        crit_chance = self.LUK / 2  # 暴击率 = LUK / 2%
+        if random.randint(1, 100) <= crit_chance:
+            crit_multiplier = random.choice([1.5, 2])
+            damage = int(damage * crit_multiplier)
+            print(f"{self.name} 造成暴击！伤害 x{crit_multiplier}")
         return damage
     
     def attack(self, opponent):
         damage = self.calculate_damage(opponent)
         opponent.HP -= damage
         print(f"{self.name} 攻击了 {opponent.name}，造成 {damage} 伤害！")
-    
+
     def use_skill(self, opponent):
         if self.MP >= 10:
             self.MP -= 10
@@ -43,16 +51,16 @@ class Character:
             print("MP不足，无法使用技能！")
             return False
         return True
-    
+
     def gain_exp(self, amount):
         self.exp += amount
-        print(f"{self.name} 获得了 {amount} 经验值！")
+        print(f"{self.name} 获得 {amount} 经验值！")
         if self.exp >= self.exp_to_next:
             self.level_up()
-    
+
     def gain_gold(self, amount):
         self.gold += amount
-        print(f"{self.name} 获得了 {amount} 金币！ (当前金币: {self.gold})")
+        print(f"{self.name} 获得 {amount} 金币！(当前金币: {self.gold})")
 
     def level_up(self):
         self.level += 1
@@ -64,18 +72,18 @@ class Character:
         self.DEF += 2
         self.MAT += 3
         self.MDF += 2
-        self.AGI += 1  # 升级增加敏捷
+        self.AGI += 1
         self.LUK += 1
         self.HP = self.MaxHP
         self.MP = self.MaxMP
-        print(f"{self.name} 升级到了等级 {self.level}！所有属性提升，生命值和魔法值已恢复！")
+        print(f"{self.name} 升级到了 {self.level} 级！")
         print(f"{self.name}: (MaxHP: {self.MaxHP}, MaxMP: {self.MaxMP}, ATK: {self.ATK}, DEF: {self.DEF}, MAT: {self.MAT}, MDF: {self.MDF}, AGI: {self.AGI}, LUK: {self.LUK}, 技能: {self.skill})")
 
 class Enemy(Character):
     def __init__(self, name, max_hp, max_mp, atk, defense, mat, mdf, agi, luk, skill, exp_reward, gold_reward):
         super().__init__(name, max_hp, max_mp, atk, defense, mat, mdf, agi, luk, skill)
         self.exp_reward = exp_reward
-        self.gold_reward = gold_reward  # 敌人掉落金币
+        self.gold_reward = gold_reward
 
 def load_classes():
     classes = {}
@@ -111,14 +119,8 @@ def load_enemies():
             for row in reader:
                 enemies.append(Enemy(
                     row['name'],
-                    int(row['max_hp']),
-                    int(row['max_mp']),
-                    int(row['atk']),
-                    int(row['defense']),
-                    int(row['mat']),
-                    int(row['mdf']),
-                    int(row['agi']),
-                    int(row['luk']),
+                    int(row['max_hp']),int(row['max_mp']),int(row['atk']),int(row['defense']),
+                    int(row['mat']),int(row['mdf']),int(row['agi']),int(row['luk']),
                     row['skill'],
                     int(row['exp_reward']),
                     int(row['gold_reward'])  # 读取金币奖励
@@ -222,6 +224,7 @@ def main():
         print(f"HP: {player.HP}/{player.MaxHP}")
         print(f"MP: {player.MP}/{player.MaxMP}")
         print(f"EXP: {player.exp}/{player.exp_to_next}")
+        print(f"暴击率: {player.LUK/2}%")
         command = input("输入 'q' 退出游戏, 按 Enter 继续战斗: ")
         if command.lower() == 'q':
             print("游戏结束，再见！")
