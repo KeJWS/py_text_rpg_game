@@ -141,13 +141,23 @@ def main():
         display_player_info(player)
 
         print()
-        command = input("e: 退出, w: 换装, b: 背包, m: 商店, a: 战斗 ")
+        command = input("e: 退出, w: 换装, b: 背包, m: 商店, a: 战斗, s: 存档, l: 加载（测试） ")
         if command.lower() == 'e':
             print("游戏结束，再见！")
             break
 
         elif command.lower() == 'w':
             external_change_equipment(player)
+
+        elif command.lower() == 's':
+            # player.unequip_weapon()
+            # player.unequip_armor()
+            player.save()
+
+        elif command.lower() == 'l':
+            # player.unequip_weapon()
+            # player.unequip_armor()
+            player.load()
 
         elif command == "b":
             clear_screen()

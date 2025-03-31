@@ -93,3 +93,12 @@ def load_maps():
     }
     return maps
 
+# 通过 ID 获取武器
+def load_weapon_by_id(weapon_id):
+    weapons = load_weapons()
+    return weapons.get(weapon_id, None)
+
+# 通过 ID 获取防具
+def load_armor_by_id(armor_id):
+    armors = load_armor()
+    return armors.get(armor_id, None)

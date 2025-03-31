@@ -1,6 +1,6 @@
 import game_data
-
 import random
+from save_manager import SaveManager
 
 class Weapon:
     def __init__(self, id, name, attack_bonus, price, note):
@@ -132,7 +132,7 @@ class Character:
 
     def level_up(self):
         self.level += 1
-        self.exp, self.exp_to_next = 0, int(self.exp_to_next * 1.5)
+        self.exp, self.exp_to_next = 0, int(50 * (self.level ** 1.5))
         growth = {"MaxHP": 20, "MaxMP": 10, "ATK": 3, "DEF": 2, "MAT": 3, "MDF": 2, "AGI": 1, "LUK": 1}
         for stat, inc in growth.items():
             setattr(self, stat, getattr(self, stat) + inc)
@@ -146,6 +146,14 @@ class Character:
         for stat, value in self.base_stats.items():
             setattr(self, stat, value)
         self.HP, self.MP = self.MaxHP, self.MaxMP
+
+    def save(self):
+        """保存角色数据"""
+        SaveManager.save_character(self)
+
+    def load(self):
+        """加载存档"""
+        return SaveManager.load_character(self)
 
 class Enemy(Character):
     def __init__(self, id, name, max_hp, max_mp, atk, defense, mat, mdf, agi, luk, skill, exp_reward, gold_reward, min_level=1, max_level=99):
@@ -207,7 +215,7 @@ class Inventory:
             print("（空）")
         for item_id, quantity in self.items.items():
             item = item_list[item_id]
-            print(f"{item.id}, {item.name} x{quantity})")
+            print(f"{item.id}, {item.name} x{quantity}")
 
     def use_item(self, item_id, target, item_list):
         """使用背包中的物品"""
