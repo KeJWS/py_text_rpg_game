@@ -115,7 +115,7 @@ class Character:
     
     def apply_critical_hit(self, damage):
         if random.randint(1, 100) <= self.LUK / 2:
-            crit_multiplier = random.choice([1.5, 2])
+            crit_multiplier = random.choice([1.5, 2, 2.5])
             print(f"{self.name} 造成暴击！伤害 x{crit_multiplier}")
             return int(damage * crit_multiplier)
         return damage
