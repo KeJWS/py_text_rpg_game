@@ -1,4 +1,5 @@
-id,name,defense_bonus,health_bonus
-1,铁甲,5,20
-2,皮甲,3,10
-3,魔法袍,2,30
+id,name,defense_bonus,health_bonus,price
+1,布衣,1,5,10
+2,铁甲,5,20,200
+3,皮甲,3,10,150
+4,魔法袍,2,30,240

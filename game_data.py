@@ -63,6 +63,14 @@ def load_enemies():
         exit()
     return enemies
 
+def load_items():
+    items = {}
+    with open("items.csv", encoding="utf-8") as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            items[int(row["id"])] = Item(int(row["id"]), row["name"], row["type"], row["effect"], int(row["value"]), int(row["price"]))
+    return items
+
 def load_weapons():
     weapons = {}
     with open('weapons.csv', mode='r', encoding='utf-8') as file:
@@ -71,7 +79,8 @@ def load_weapons():
             weapon = Weapon(
                 id=int(row['id']),
                 name=row['name'],
-                attack_bonus=int(row['attack_bonus'])
+                attack_bonus=int(row['attack_bonus']),
+                price=int(row['price'])
             )
             weapons[weapon.id] = weapon
     return weapons
@@ -85,17 +94,8 @@ def load_armor():
                 id=int(row['id']),
                 name=row['name'],
                 defense_bonus=int(row['defense_bonus']),
-                health_bonus=int(row['health_bonus'])
+                health_bonus=int(row['health_bonus']),
+                price=int(row['price'])
             )
             armors[armor.id] = armor
     return armors
-
-def load_items():
-    items = {}
-    with open("items.csv", encoding="utf-8") as file:
-        reader = csv.reader(file)
-        next(reader)
-        for row in reader:
-            item = Item(*row)
-            items[item.id] = item
-        return items

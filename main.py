@@ -1,7 +1,7 @@
 import random
 import os
 from game_data import load_classes, load_enemies, load_weapons, load_armor, load_items
-from character import Character, Enemy, Weapon, Equipment, Item, Inventory, Shop
+from character import ItemShop, WeaponShop, ArmorShop, Weapon, Equipment
 from change_equipment import change_equipment
 
 def clear_screen():
@@ -113,13 +113,27 @@ class Battle:
 
 def choose_class():
     classes = load_classes()
+
+    # 🎯 各职业初始装备ID（武器ID, 护甲ID）
+    initial_equipment = {
+        "1": (1, 3),  # 战士: 木剑 + 皮甲甲
+        "2": (2, 1),  # 法师: 木杖 + 布衣
+        "3": (3, 1),  # 盗贼: 匕首 + 布衣
+        "4": (4, 3)   # 勇者: 勇者剑 + 皮甲
+    }
+
     print("选择你的职业:")
-    for key, char in classes.items():
-        print(f"{key}: {char.name} (MaxHP: {char.MaxHP}, MaxMP: {char.MaxMP}, ATK: {char.ATK}, DEF: {char.DEF}, MAT: {char.MAT}, MDF: {char.MDF}, AGI: {char.AGI}, LUK: {char.LUK}, 技能: {char.skill})")
+    # for key, char in classes.items():
+        # print(f"{key}: {char.name} (MaxHP: {char.MaxHP}, MaxMP: {char.MaxMP}, ATK: {char.ATK}, DEF: {char.DEF}, MAT: {char.MAT}, MDF: {char.MDF}, AGI: {char.AGI}, LUK: {char.LUK}, 技能: {char.skill})")
+
+    print("1、战士，注重攻击和防御。\n2、法师，注重魔攻和魔防。\n3、盗贼，更高的敏捷和运气。\n4、勇者，感觉是个厉害的角色。")
 
     choice = input("请输入对应的数字: ")
     clear_screen()
-    return classes.get(choice, classes["1"])  # 默认选择战士
+    chosen_class = classes.get(choice, classes["1"])
+    weapon_id, armor_id = initial_equipment.get(choice, (1, 1))  # 获取装备 ID
+
+    return chosen_class, weapon_id, armor_id  # 返回职业 + 装备 ID
 
 def get_random_enemy(player_level):
     """根据玩家等级随机选择合适的敌人"""
@@ -134,21 +148,22 @@ def battle(player):
     battle_instance = Battle(player, enemy)
     battle_instance.process_battle()
 
-def external_change_equipment(player, weapons, armors):
+def external_change_equipment(player):
     clear_screen()
     print("更换装备")
-    change_equipment(player, weapons, armors)
+    change_equipment(player)
 
 def shop_menu(player, shop):
     while True:
         shop.display_items()
         print(f"\n💰 你的金币: {player.gold} G")
-        choice = input("🔹 请输入要购买的物品 ID（输入 q 退出）: ")
-        if choice == "q":
-            break
-        elif choice.isdigit() and int(choice) in shop.items_for_sale:
+        item_id = input("🔹 请输入要购买的物品 ID（输入 q 退出）: ")
+        if item_id == "q":
             clear_screen()
-            shop.buy_item(player, int(choice))
+            break
+        if item_id.isdigit():
+            clear_screen()
+            shop.buy_item(player, int(item_id))
         else:
             clear_screen()
             print("⚠️ 请输入正确的物品 ID！")
@@ -166,10 +181,18 @@ def display_player_info(player):
 
 def main():
     print("欢迎来到文字RPG冒险！")
-    player = choose_class()
+    player, weapon_id, armor_id = choose_class()  # 获取职业 & 装备 ID
     items = load_items()
-    shop = Shop(items)
-    weapons, armors = load_weapons(), load_armor()
+    weapons = load_weapons()
+    armors = load_armor()
+
+    item_shop = ItemShop(items)
+    weapon_shop = WeaponShop(weapons)
+    armor_shop = ArmorShop(armors)
+
+    print(f"🎁 你获得了初始装备！")
+    player.add_weapon(weapons[weapon_id])
+    player.add_armor(armors[armor_id])
 
     print(f"你选择了 {player.name}，冒险开始！")
 
@@ -183,7 +206,7 @@ def main():
             break
 
         elif command.lower() == 'w':
-            external_change_equipment(player, weapons, armors)
+            external_change_equipment(player)
 
         elif command == "b":
             clear_screen()
@@ -201,7 +224,29 @@ def main():
 
         elif command == "m":
             clear_screen()
-            shop_menu(player, shop)
+            while True:
+                print("\n🏪 欢迎来到商店区！你想进入哪个商店？")
+                print("1. 物品商店")
+                print("2. 武器商店")
+                print("3. 护甲商店")
+                choice = input("输入选项，q 退出: ")
+
+                if choice == "1":
+                    clear_screen()
+                    shop_menu(player, item_shop)
+                elif choice == "2":
+                    clear_screen()
+                    shop_menu(player, weapon_shop)
+                elif choice == "3":
+                    clear_screen()
+                    shop_menu(player, armor_shop)
+                elif choice == "q":
+                    clear_screen()
+                    print("👋 再见，欢迎下次光临！")
+                    break
+                else:
+                    clear_screen()
+                    print("⚠️ 请输入有效选项！")
 
         elif command == "a":
             clear_screen()

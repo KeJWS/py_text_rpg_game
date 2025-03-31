@@ -3,26 +3,28 @@ import game_data
 import random
 
 class Weapon:
-    def __init__(self, id, name, attack_bonus):
+    def __init__(self, id, name, attack_bonus, price):
         self.id = id
         self.name = name
         self.attack_bonus = attack_bonus
+        self.price = price
 
     def __str__(self):
         return f"{self.name} (ATK + {self.attack_bonus})"
 
 class Equipment:
-    def __init__(self, id, name, defense_bonus, health_bonus):
+    def __init__(self, id, name, defense_bonus, health_bonus, price):
         self.id = id
         self.name = name
         self.defense_bonus = defense_bonus
         self.health_bonus = health_bonus
+        self.price = price
 
     def __str__(self):
         return f"{self.name} (DEF + {self.defense_bonus}, MaxHP + {self.health_bonus})"
 
 class Character:
-    def __init__(self, name, max_hp, max_mp, atk, defense, mat, mdf, agi, luk, skill, weapon=None, equipment=None):
+    def __init__(self, name, max_hp, max_mp, atk, defense, mat, mdf, agi, luk, skill):
         self.name = name
         self.MaxHP = max_hp
         self.MaxMP = max_mp
@@ -39,50 +41,66 @@ class Character:
         self.exp = 0
         self.exp_to_next = 50
         self.gold = 0
-        self.weapon = weapon
-        self.equipment = equipment
+        self.weapon = None
+        self.equipment = None
+        self.weapons = {}  # 角色自己的武器库 {id: Weapon对象}
+        self.armors = {}   # 角色自己的防具库 {id: Equipment对象}
         self.inventory = Inventory()
 
-    def equip_weapon(self, weapon):
-        """装备或脱下武器"""
-        if weapon is None:
-            if self.weapon:
-                print(f"{self.name} 脱下了 {self.weapon.name}。ATK-{self.weapon.attack_bonus}")
-                self.ATK -= self.weapon.attack_bonus
-            self.weapon = None
-            print(f"{self.name} 现在没有武器。")
-        else:
-            if self.weapon:
-                print(f"{self.name} 脱下了 {self.weapon.name}。ATK-{self.weapon.attack_bonus}")
-                self.ATK -= self.weapon.attack_bonus
-            if weapon.id in game_data.load_weapons():
-                self.weapon = weapon
-                self.ATK += weapon.attack_bonus
-                print(f"{self.name} 装备了 {weapon.name}，ATK+{weapon.attack_bonus}。")
-            else:
-                print("无效的护甲ID！")
+    def add_weapon(self, weapon):
+        """角色获得武器"""
+        self.weapons[weapon.id] = weapon
+        print(f"🔪 {self.name} 获得了武器 {weapon.name}！")
 
-    def equip_armor(self, equipment):
-        """装备或脱下防具"""
-        if equipment is None:
-            if self.equipment:
-                print(f"{self.name} 脱下了 {self.equipment.name}。DEF-{self.equipment.defense_bonus}, MaxHP-{self.equipment.health_bonus}")
-                self.DEF -= self.equipment.defense_bonus
-                self.MaxHP -= self.equipment.health_bonus
-            self.equipment = None
-            print(f"{self.name} 现在没有防具。")
+    def add_armor(self, armor):
+        """角色获得防具"""
+        self.armors[armor.id] = armor
+        print(f"🛡️ {self.name} 获得了防具 {armor.name}！")
+
+    def equip_weapon(self, weapon_id):
+        """装备或脱下武器"""
+        if weapon_id is None:
+            if self.weapon:
+                print(f"{self.name} 脱下了 {self.weapon.name}。ATK-{self.weapon.attack_bonus}")
+                self.ATK -= self.weapon.attack_bonus
+                self.weapon = None
+            print(f"{self.name} 现在没有武器。")
+            return
+
+        if weapon_id in self.weapons:
+            weapon = self.weapons[weapon_id]
+            if self.weapon:
+                print(f"{self.name} 脱下了 {self.weapon.name}。ATK-{self.weapon.attack_bonus}")
+                self.ATK -= self.weapon.attack_bonus
+            self.weapon = weapon
+            self.ATK += weapon.attack_bonus
+            print(f"{self.name} 装备了 {weapon.name}，ATK+{weapon.attack_bonus}。")
         else:
+            print("⚠️ 你没有这把武器！")
+
+    def equip_armor(self, armor_id):
+        """装备或脱下防具"""
+        if armor_id is None:
             if self.equipment:
                 print(f"{self.name} 脱下了 {self.equipment.name}。DEF-{self.equipment.defense_bonus}, MaxHP-{self.equipment.health_bonus}")
                 self.DEF -= self.equipment.defense_bonus
                 self.MaxHP -= self.equipment.health_bonus
-            if equipment.id in game_data.load_armor():
-                self.equipment = equipment
-                self.DEF += equipment.defense_bonus
-                self.MaxHP += equipment.health_bonus
-                print(f"{self.name} 装备了 {equipment.name}，DEF+{equipment.defense_bonus}, MaxHP+{equipment.health_bonus}")
-            else:
-                print("无效的护甲ID！")
+                self.equipment = None
+            print(f"{self.name} 现在没有防具。")
+            return
+
+        if armor_id in self.armors:
+            armor = self.armors[armor_id]
+            if self.equipment:
+                print(f"{self.name} 脱下了 {self.equipment.name}。DEF-{self.equipment.defense_bonus}, MaxHP-{self.equipment.health_bonus}")
+                self.DEF -= self.equipment.defense_bonus
+                self.MaxHP -= self.equipment.health_bonus
+            self.equipment = armor
+            self.DEF += armor.defense_bonus
+            self.MaxHP += armor.health_bonus
+            print(f"{self.name} 装备了 {armor.name}，DEF+{armor.defense_bonus}, MaxHP+{armor.health_bonus}")
+        else:
+            print("⚠️ 你没有这件防具！")
 
     def attack(self, opponent):
         damage = self.calculate_damage(opponent)
@@ -208,7 +226,7 @@ class Inventory:
             print("（空）")
         for item_id, quantity in self.items.items():
             item = item_list[item_id]
-            print(f"{item.name} x{quantity} ({item.type})")
+            print(f"{item.id}, {item.name} x{quantity} ({item.type})")
 
     def use_item(self, item_id, target, item_list):
         """使用背包中的物品"""
@@ -219,19 +237,19 @@ class Inventory:
         else:
             print("⚠️ 你没有这个物品！")
 
-class Shop:
+class ItemShop:
     def __init__(self, items):
-        """初始化商店，选择可出售的物品"""
+        """初始化物品商店"""
         self.items_for_sale = {id_: item for id_, item in items.items()}
 
     def display_items(self):
-        """显示商店可购买的商品"""
-        print("\n🛒 商店：")
-        print("ID   |   物品名      效果        效果值      价格")
-        print("-" * 60)
+        """显示商店中的物品"""
+        print("\n🛒 物品商店：")
+        print("ID   |   名称        类型       效果        价格")
+        print("-" * 50)
         for item in self.items_for_sale.values():
-            print(f"{item.id:2} |   {item.name:6}      {item.effect:3}     +{item.value:3}      {item.price:3} G")
-        print("-" * 60)
+            print(f"{item.id:2} | {item.name:6}  {item.type:3}      {item.effect:3} +{item.value:3}    {item.price:3} G")
+        print("-" * 50)
 
     def buy_item(self, player, item_id):
         """购买物品"""
@@ -240,9 +258,63 @@ class Shop:
             if player.gold >= item.price:
                 player.gold -= item.price
                 player.inventory.add_item(item)
-                print(f"✅ 你成功购买了 {item.name}！")
+                print(f"✅ 你成功购买了 {item.name}！(剩余金币: {player.gold})")
             else:
                 print("⚠️ 你的金币不足！")
         else:
             print("⚠️ 物品不存在！")
 
+
+class WeaponShop:
+    def __init__(self, weapons):
+        """初始化武器商店"""
+        self.weapons_for_sale = {id_: weapon for id_, weapon in weapons.items()}
+
+    def display_items(self):
+        """显示商店中的武器"""
+        print("\n🔪 武器商店：")
+        print("ID   |   名称        类型       攻击力加成  价格")
+        print("-" * 50)
+        for weapon in self.weapons_for_sale.values():
+            print(f"{weapon.id:2} | {weapon.name:10}  武器      ATK+{weapon.attack_bonus:3}    {weapon.price:9} G")
+        print("-" * 50)
+
+    def buy_item(self, player, weapon_id):
+        """购买武器"""
+        if weapon_id in self.weapons_for_sale:
+            weapon = self.weapons_for_sale[weapon_id]
+            if player.gold >= weapon.price:
+                player.gold -= weapon.price
+                player.add_weapon(weapon)
+                print(f"✅ 你成功购买了 {weapon.name}！(剩余金币: {player.gold})")
+            else:
+                print("⚠️ 你的金币不足！")
+        else:
+            print("⚠️ 武器不存在！")
+
+class ArmorShop:
+    def __init__(self, armors):
+        """初始化护甲商店"""
+        self.armors_for_sale = {id_: armor for id_, armor in armors.items()}
+
+    def display_items(self):
+        """显示商店中的护甲"""
+        print("\n🛡️ 护甲商店：")
+        print("ID   |   名称        类型       防御力加成  生命加成  价格")
+        print("-" * 50)
+        for armor in self.armors_for_sale.values():
+            print(f"{armor.id:2} | {armor.name:6}  防具      DEF+{armor.defense_bonus:3}  HP+{armor.health_bonus:3}    {armor.price:3} G")
+        print("-" * 50)
+
+    def buy_item(self, player, armor_id):
+        """购买护甲"""
+        if armor_id in self.armors_for_sale:
+            armor = self.armors_for_sale[armor_id]
+            if player.gold >= armor.price:
+                player.gold -= armor.price
+                player.add_armor(armor)
+                print(f"✅ 你成功购买了 {armor.name}！(剩余金币: {player.gold})")
+            else:
+                print("⚠️ 你的金币不足！")
+        else:
+            print("⚠️ 护甲不存在！")
