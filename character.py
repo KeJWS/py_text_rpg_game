@@ -3,28 +3,41 @@ import game_data
 import random
 
 class Weapon:
-    def __init__(self, id, name, attack_bonus, price):
+    def __init__(self, id, name, attack_bonus, price, note):
         self.id = id
         self.name = name
         self.attack_bonus = attack_bonus
         self.price = price
+        self.note = note
 
     def __str__(self):
         return f"{self.name} (ATK + {self.attack_bonus})"
 
 class Equipment:
-    def __init__(self, id, name, defense_bonus, health_bonus, price):
+    def __init__(self, id, name, defense_bonus, health_bonus, price, note):
         self.id = id
         self.name = name
         self.defense_bonus = defense_bonus
         self.health_bonus = health_bonus
         self.price = price
+        self.note = note
 
     def __str__(self):
         return f"{self.name} (DEF + {self.defense_bonus}, MaxHP + {self.health_bonus})"
 
 class Character:
     def __init__(self, name, max_hp, max_mp, atk, defense, mat, mdf, agi, luk, skill):
+
+        # 记录初始属性（基础值）
+        self.base_MaxHP = max_hp
+        self.base_MaxMP = max_mp
+        self.base_ATK = atk
+        self.base_DEF = defense
+        self.base_MAT = mat
+        self.base_MDF = mdf
+        self.base_AGI = agi
+        self.base_LUK = luk
+
         self.name = name
         self.MaxHP = max_hp
         self.MaxMP = max_mp
@@ -153,6 +166,24 @@ class Character:
         print(f"\033[33m{self.name} 升级到 {self.level} 级！\033[0m")
         print(f"{self.name}: (MaxHP: {self.MaxHP}, MaxMP: {self.MaxMP}, ATK: {self.ATK}, DEF: {self.DEF}, MAT: {self.MAT}, MDF: {self.MDF}, AGI: {self.AGI}, LUK: {self.LUK}, 技能: {self.skill})")
 
+    def reset_stats(self):
+        """转生时重置角色属性，保留物品、武器、防具、金币"""
+        print("✨ 你的属性被重置！但装备和金币得到了保留！")
+
+        self.level = 1
+        self.exp = 0
+        self.exp_to_next = 50
+        self.MaxHP = self.base_MaxHP
+        self.MaxMP = self.base_MaxMP
+        self.HP = self.MaxHP
+        self.MP = self.MaxMP
+        self.ATK = self.base_ATK
+        self.DEF = self.base_DEF
+        self.MAT = self.base_MAT
+        self.MDF = self.base_MDF
+        self.AGI = self.base_AGI
+        self.LUK = self.base_LUK
+
 class Enemy(Character):
     def __init__(self, name, max_hp, max_mp, atk, defense, mat, mdf, agi, luk, skill, exp_reward, gold_reward, min_level=1, max_level=99):
         super().__init__(name, max_hp, max_mp, atk, defense, mat, mdf, agi, luk, skill)
@@ -175,13 +206,14 @@ class Enemy(Character):
         self.MaxHP += equipment.health_bonus
 
 class Item:
-    def __init__(self, item_id, name, item_type, effect, value, price):
+    def __init__(self, item_id, name, item_type, effect, value, price, note):
         self.id = int(item_id)
         self.name = name
         self.type = item_type  # 恢复 / 战斗 / 任务
         self.effect = effect  # HP / MP / ATK / DEF
         self.value = int(value)
         self.price = int(price)
+        self.note = int(note)
 
     def use(self, target):
         """使用物品，作用于目标角色"""
@@ -240,7 +272,7 @@ class Inventory:
 class ItemShop:
     def __init__(self, items):
         """初始化物品商店"""
-        self.items_for_sale = {id_: item for id_, item in items.items()}
+        self.items_for_sale = {k: v for k, v in items.items() if v.note != 1}  # 过滤掉 note=1 的物品
 
     def display_items(self):
         """显示商店中的物品"""
@@ -268,16 +300,16 @@ class ItemShop:
 class WeaponShop:
     def __init__(self, weapons):
         """初始化武器商店"""
-        self.weapons_for_sale = {id_: weapon for id_, weapon in weapons.items()}
+        self.weapons_for_sale = {k: v for k, v in weapons.items() if v.note != 1}
 
     def display_items(self):
         """显示商店中的武器"""
         print("\n🔪 武器商店：")
-        print("ID   |   名称        类型       攻击力加成  价格")
-        print("-" * 50)
+        print("ID   |   名称    攻击力加成  价格")
+        print("-" * 70)
         for weapon in self.weapons_for_sale.values():
-            print(f"{weapon.id:2} | {weapon.name:10}  武器      ATK+{weapon.attack_bonus:3}    {weapon.price:9} G")
-        print("-" * 50)
+            print(f"{weapon.id:3}   |   {weapon.name:6}     ATK+{weapon.attack_bonus:2}     {weapon.price:3} G")
+        print("-" * 70)
 
     def buy_item(self, player, weapon_id):
         """购买武器"""
@@ -295,16 +327,16 @@ class WeaponShop:
 class ArmorShop:
     def __init__(self, armors):
         """初始化护甲商店"""
-        self.armors_for_sale = {id_: armor for id_, armor in armors.items()}
+        self.armors_for_sale = {k: v for k, v in armors.items() if v.note != 1}
 
     def display_items(self):
         """显示商店中的护甲"""
         print("\n🛡️ 护甲商店：")
-        print("ID   |   名称        类型       防御力加成  生命加成  价格")
-        print("-" * 50)
+        print("ID   |   名称    防御力加成  生命加成    价格")
+        print("-" * 70)
         for armor in self.armors_for_sale.values():
-            print(f"{armor.id:2} | {armor.name:6}  防具      DEF+{armor.defense_bonus:3}  HP+{armor.health_bonus:3}    {armor.price:3} G")
-        print("-" * 50)
+            print(f"{armor.id:3}    |   {armor.name:6}  DEF+{armor.defense_bonus:2}     HP+{armor.health_bonus:2}   {armor.price:3} G")
+        print("-" * 70)
 
     def buy_item(self, player, armor_id):
         """购买护甲"""

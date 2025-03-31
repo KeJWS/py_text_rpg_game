@@ -76,6 +76,22 @@ def display_player_info(player):
     print(f"🔪 武器: {player.weapon}")
     print(f"🛡️ 护甲: {player.equipment}")
 
+def rebirth(player):
+    """执行转生逻辑，重置属性但保留物品、武器、防具、金币"""
+    print("\n💀 你已死亡！但你可以选择转生继续冒险！")
+    choice = input("是否转生？(y/n): ").lower()
+    
+    if choice == "y":
+        if player.weapon or player.equipment:
+            print("❌ 你脱下了所有装备。")
+            player.equip_weapon(None)
+            player.equip_armor(None)
+        player.reset_stats()  # 直接调用 reset_stats() 方法
+        input("\n按 Enter 继续冒险...")
+    else:
+        print("👋 游戏结束，再见！")
+        exit()
+
 def main():
     print("欢迎来到文字RPG冒险！")
     player, weapon_id, armor_id = choose_class()  # 获取职业 & 装备 ID
@@ -154,6 +170,8 @@ def main():
                 player.MP = min(player.MaxMP, player.MP + int(player.MaxMP*0.25))
                 print("你恢复了一部分生命值和魔法值，准备迎接下一个挑战！")
                 input("\n按 Enter 继续...")
+            else:
+                rebirth(player)
 
         clear_screen()
         print("干嘛呢？")
