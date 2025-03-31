@@ -11,7 +11,6 @@ def clear_screen():
 def choose_class():
     classes = load_classes()
 
-    # 🎯 各职业初始装备ID（武器ID, 护甲ID）
     initial_equipment = {
         "1": (1, 3),
         "2": (2, 1),
@@ -120,20 +119,16 @@ def choose_map():
 
     choice = input("请输入对应的数字: ")
     clear_screen()
-    chosen_map = maps.get(choice, maps["1"])  # 默认为草原地图
+    chosen_map = maps.get(choice, maps["1"])
 
-    return chosen_map  # 返回选择的地图
+    return chosen_map
 
 def main():
     print("欢迎来到文字RPG冒险！")
-    player, weapon_id, armor_id = choose_class()  # 获取职业 & 装备 ID
-    items = load_items()
-    weapons = load_weapons()
-    armors = load_armor()
+    player, weapon_id, armor_id = choose_class()
+    items, weapons, armors = load_items(), load_weapons(), load_armor()
 
-    item_shop = ItemShop(items)
-    weapon_shop = WeaponShop(weapons)
-    armor_shop = ArmorShop(armors)
+    item_shop, weapon_shop, armor_shop = ItemShop(items), WeaponShop(weapons), ArmorShop(armors)
 
     print(f"🎁 你获得了初始装备！")
     player.gain_gold(100)
@@ -200,7 +195,6 @@ def main():
             if player.HP > 0:
                 # player.HP = min(player.MaxHP, player.HP + int(player.MaxHP*0.25))
                 # player.MP = min(player.MaxMP, player.MP + int(player.MaxMP*0.25))
-                # print("你恢复了一部分生命值和魔法值，准备迎接下一个挑战！")
                 input("\n按 Enter 继续...")
             else:
                 rebirth(player)
