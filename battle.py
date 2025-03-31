@@ -103,22 +103,8 @@ class Battle:
             self.player.gain_exp(self.enemy.exp_reward)
             self.player.gain_gold(self.enemy.gold_reward)
 
-            self.drop_items()
-
         else:
             print("💀 \033[31m你被击败了，游戏结束。\033[0m")
 
         input("\n按 Enter 继续...")
         clear_screen()
-
-    def drop_items(self):
-        """敌人死亡后掉落物品"""
-        dropped_items = self.enemy.drop(self.player.inventory.items)  # 确保 item_list 传入正确
-        
-        if dropped_items:
-            for item in dropped_items:
-                self.player.inventory.add_item(item)
-                print(f"🎉 {self.enemy.name} 掉落了物品: {item.name}！")
-        else:
-            print(f"📭 {self.enemy.name} 没有掉落任何物品。")
-
