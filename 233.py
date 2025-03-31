@@ -145,10 +145,3 @@ class Character:
         for stat, value in self.base_stats.items():
             setattr(self, stat, value)
         self.HP, self.MP = self.MaxHP, self.MaxMP
-
-class Enemy(Character):
-    def __init__(self, id, name, max_hp, max_mp, atk, defense, mat, mdf, agi, luk, skill, exp_reward, gold_reward, min_level=1, max_level=99):
-        super().__init__(name, max_hp, max_mp, atk, defense, mat, mdf, agi, luk, skill)
-        self.id = id
-        self.exp_reward, self.gold_reward = exp_reward, gold_reward
-        self.min_level, self.max_level = min_level, max_level
