@@ -75,22 +75,22 @@ def change_equipment(player):
             clear_screen()
             if player.weapon:
                 print(f"❌ 你脱下了 {player.weapon.name}。")
-                player.equip_weapon(None)
+                player.unequip_weapon()
             else:
                 print("⚠️ 你没有装备武器。")
         elif choice == "4":
             clear_screen()
             if player.equipment:
                 print(f"❌ 你脱下了 {player.equipment.name}。")
-                player.equip_armor(None)
+                player.unequip_armor()
             else:
                 print("⚠️ 你没有装备护甲。")
         elif choice == "5":
             clear_screen()
             if player.weapon or player.equipment:
                 print("❌ 你脱下了所有装备。")
-                player.equip_weapon(None)
-                player.equip_armor(None)
+                player.unequip_weapon()
+                player.unequip_armor()
             else:
                 print("⚠️ 你已经没有装备。")
         else:

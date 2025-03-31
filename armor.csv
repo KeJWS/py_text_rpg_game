@@ -3,3 +3,4 @@ id,name,defense_bonus,health_bonus,price,note
 2,铁甲,5,20,200,0
 3,皮甲,3,10,150,0
 4,魔法袍,2,30,240,0
+5,重甲,10,0,450,0

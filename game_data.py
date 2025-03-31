@@ -4,22 +4,15 @@ from character import Character, Enemy, Weapon, Equipment, Item, Inventory, Map
 def load_classes():
     """从 CSV 加载职业数据，返回字典"""
     classes = {}
-    try:
-        with open('classes.csv', newline='', encoding='utf-8') as csvfile:
-            reader = csv.DictReader(csvfile)
-            for row in reader:
-                classes[row['id']] = Character(
-                    row['name'],
-                    int(row['max_hp']), int(row['max_mp']), int(row['atk']), int(row['defense']),
-                    int(row['mat']), int(row['mdf']), int(row['agi']), int(row['luk']),
-                    row['skill'],
-                )
-    except FileNotFoundError:
-        print("❌ 职业数据文件 classes.csv 未找到！")
-        exit()
-    except Exception as e:
-        print(f"❌ 读取 classes.csv 时出错: {e}")
-        exit()
+    with open('classes.csv', newline='', encoding='utf-8') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            classes[row['id']] = Character(
+                row['name'],
+                int(row['max_hp']), int(row['max_mp']), int(row['atk']), int(row['defense']),
+                int(row['mat']), int(row['mdf']), int(row['agi']), int(row['luk']),
+                row['skill'],
+            )
     return classes
 
 def parse_enemy_level(level_range):
@@ -34,34 +27,22 @@ def parse_enemy_level(level_range):
 def load_enemies():
     """从 CSV 加载敌人数据，返回列表"""
     enemies = []
-    try:
-        with open("enemies.csv", newline="", encoding="utf-8") as csvfile:
-            reader = csv.DictReader(csvfile)
-            for row in reader:
-                min_level, max_level = parse_enemy_level(row["level_range"])
-                enemies.append(Enemy(
-                    id=int(row["id"]),
-                    name=row["name"],
-                    max_hp=int(row["max_hp"]),
-                    max_mp=int(row["max_mp"]),
-                    atk=int(row["atk"]),
-                    defense=int(row["defense"]),
-                    mat=int(row["mat"]),
-                    mdf=int(row["mdf"]),
-                    agi=int(row["agi"]),
-                    luk=int(row["luk"]),
-                    skill=row["skill"],
-                    exp_reward=int(row["exp_reward"]),
-                    gold_reward=int(row["gold_reward"]),
-                    min_level=min_level,
-                    max_level=max_level
-                ))
-    except FileNotFoundError:
-        print("❌ 敌人数据文件 enemies.csv 未找到！")
-        exit()
-    except Exception as e:
-        print(f"❌ 读取 enemies.csv 时出错: {e}")
-        exit()
+    with open("enemies.csv", newline="", encoding="utf-8") as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            min_level, max_level = parse_enemy_level(row["level_range"])
+            enemies.append(Enemy(
+                id=int(row["id"]), name=row["name"],
+                max_hp=int(row["max_hp"]), max_mp=int(row["max_mp"]),
+                atk=int(row["atk"]), defense=int(row["defense"]),
+                mat=int(row["mat"]), mdf=int(row["mdf"]),
+                agi=int(row["agi"]), luk=int(row["luk"]),
+                skill=row["skill"],
+                exp_reward=int(row["exp_reward"]),
+                gold_reward=int(row["gold_reward"]),
+                min_level=min_level,
+                max_level=max_level
+            ))
     return enemies
 
 def load_items():
@@ -106,9 +87,9 @@ def load_armor():
 def load_maps():
     """加载地图数据"""
     maps = {
-        "1": Map("草原", [1, 2]),
-        "2": Map("沙漠", [3, 4]),
-        "3": Map("死亡谷", [5, 6, 7]),
+        "1": Map("草原 Lv1", [1, 2, 4]),
+        "2": Map("沙漠 Lv3", [3, 4]),
+        "3": Map("死亡谷 Lv7", [5, 6, 7]),
     }
     return maps
 

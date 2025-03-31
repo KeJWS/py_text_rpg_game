@@ -6,3 +6,4 @@ id,name,type,effect,value,price,note
 5,护甲卷轴,战斗,DEF,3,100,0
 6,速度卷轴,战斗,AGI,3,100,0
 7,生命卷轴,战斗,MaxHP,15,150,0
+8,中治疗药水,恢复,HP,150,30,0

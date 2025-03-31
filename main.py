@@ -102,8 +102,8 @@ def rebirth(player):
     if choice == "y":
         if player.weapon or player.equipment:
             print("❌ 你脱下了所有装备。")
-            player.equip_weapon(None)
-            player.equip_armor(None)
+            player.unequip_weapon()
+            player.unequip_armor()
         player.reset_stats()  # 直接调用 reset_stats() 方法
         input("\n按 Enter 继续冒险...")
     else:

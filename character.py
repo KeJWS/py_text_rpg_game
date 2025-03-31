@@ -25,93 +25,71 @@ class Equipment:
     def __str__(self):
         return f"{self.name} (DEF + {self.defense_bonus}, MaxHP + {self.health_bonus})"
 
+class Shield(Equipment):
+    def __init__(self, id, name, defense_bonus, price, note):
+        super().__init__(id, name, defense_bonus, price, note)
+        self.id = id
+        self.name = name
+        self.defense_bonus = defense_bonus
+        self.price = price
+        self.note = note
+
+    def __str__(self):
+        return f"{self.name} (DEF + {self.defense_bonus})"
+
 class Character:
     def __init__(self, name, max_hp, max_mp, atk, defense, mat, mdf, agi, luk, skill):
-
-        # 记录初始属性（基础值）
-        self.base_MaxHP = max_hp
-        self.base_MaxMP = max_mp
-        self.base_ATK = atk
-        self.base_DEF = defense
-        self.base_MAT = mat
-        self.base_MDF = mdf
-        self.base_AGI = agi
-        self.base_LUK = luk
-
+        self.base_stats = {
+            "MaxHP": max_hp, "MaxMP": max_mp, "ATK": atk, "DEF": defense,
+            "MAT": mat, "MDF": mdf, "AGI": agi, "LUK": luk
+        }
         self.name = name
-        self.MaxHP = max_hp
-        self.MaxMP = max_mp
-        self.HP = max_hp
-        self.MP = max_mp
-        self.ATK = atk
-        self.DEF = defense
-        self.MAT = mat
-        self.MDF = mdf
-        self.AGI = agi
-        self.LUK = luk
+        self.MaxHP, self.MaxMP, self.ATK, self.DEF = max_hp, max_mp, atk, defense
+        self.MAT, self.MDF, self.AGI, self.LUK = mat, mdf, agi, luk
+        self.HP, self.MP = max_hp, max_mp
         self.skill = skill
-        self.level = 1
-        self.exp = 0
-        self.exp_to_next = 50
-        self.gold = 0
-        self.weapon = None
-        self.equipment = None
-        self.weapons = {}
-        self.armors = {}
+        self.level, self.exp, self.exp_to_next, self.gold = 1, 0, 50, 0
+        self.weapon, self.equipment = None, None
+        self.weapons, self.armors = {}, {}
         self.inventory = Inventory()
 
     def add_weapon(self, weapon):
-        """角色获得武器"""
         self.weapons[weapon.id] = weapon
         print(f"🔪 {self.name} 获得了武器 {weapon.name}！")
 
     def add_armor(self, armor):
-        """角色获得防具"""
         self.armors[armor.id] = armor
         print(f"🛡️ {self.name} 获得了防具 {armor.name}！")
 
-    def equip_weapon(self, weapon_id):
-        """装备或脱下武器"""
-        if weapon_id is None:
-            if self.weapon:
-                print(f"{self.name} 脱下了 {self.weapon.name}。ATK-{self.weapon.attack_bonus}")
-                self.ATK -= self.weapon.attack_bonus
-                self.weapon = None
-            print(f"{self.name} 现在没有武器。")
-            return
+    def unequip_weapon(self):
+        if self.weapon:
+            print(f"{self.name} 脱下了 {self.weapon.name}。ATK-{self.weapon.attack_bonus}")
+            self.ATK -= self.weapon.attack_bonus
+            self.weapon = None
 
+    def equip_weapon(self, weapon_id):
         if weapon_id in self.weapons:
-            weapon = self.weapons[weapon_id]
-            if self.weapon:
-                print(f"{self.name} 脱下了 {self.weapon.name}。ATK-{self.weapon.attack_bonus}")
-                self.ATK -= self.weapon.attack_bonus
-            self.weapon = weapon
-            self.ATK += weapon.attack_bonus
-            print(f"{self.name} 装备了 {weapon.name}，ATK+{weapon.attack_bonus}。")
+            self.unequip_weapon()
+            self.weapon = self.weapons[weapon_id]
+            self.ATK += self.weapon.attack_bonus
+            print(f"{self.name} 装备了 {self.weapon.name}，ATK+{self.weapon.attack_bonus}。")
         else:
             print("⚠️ 你没有这把武器！")
 
-    def equip_armor(self, armor_id):
-        """装备或脱下防具"""
-        if armor_id is None:
-            if self.equipment:
-                print(f"{self.name} 脱下了 {self.equipment.name}。DEF-{self.equipment.defense_bonus}, MaxHP-{self.equipment.health_bonus}")
-                self.DEF -= self.equipment.defense_bonus
-                self.MaxHP -= self.equipment.health_bonus
-                self.equipment = None
-            print(f"{self.name} 现在没有防具。")
-            return
+    def unequip_armor(self):
+        if self.equipment:
+            print(f"{self.name} 脱下了 {self.equipment.name}。DEF-{self.equipment.defense_bonus}, MaxHP-{self.equipment.health_bonus}")
+            self.DEF -= self.equipment.defense_bonus
+            self.MaxHP -= self.equipment.health_bonus
+            self.equipment = None
 
+    def equip_armor(self, armor_id):
         if armor_id in self.armors:
-            armor = self.armors[armor_id]
-            if self.equipment:
-                print(f"{self.name} 脱下了 {self.equipment.name}。DEF-{self.equipment.defense_bonus}, MaxHP-{self.equipment.health_bonus}")
-                self.DEF -= self.equipment.defense_bonus
-                self.MaxHP -= self.equipment.health_bonus
-            self.equipment = armor
-            self.DEF += armor.defense_bonus
-            self.MaxHP += armor.health_bonus
-            print(f"{self.name} 装备了 {armor.name}，DEF+{armor.defense_bonus}, MaxHP+{armor.health_bonus}")
+            self.unequip_armor()
+            self.equipment = self.armors[armor_id]
+            self.DEF += self.equipment.defense_bonus
+            self.MaxHP += self.equipment.health_bonus
+            print(f"{self.name} 装备了 {self.equipment.name}，DEF+{self.equipment.defense_bonus}, MaxHP+{self.equipment.health_bonus}")
         else:
             print("⚠️ 你没有这件防具！")
 
@@ -125,7 +103,7 @@ class Character:
         stat_defense = opponent.MDF if is_magical else opponent.DEF
         base_damage = max(1, stat_attack * 4 - stat_defense * 2)
         return self.apply_critical_hit(base_damage)
-    
+
     def apply_critical_hit(self, damage):
         if random.randint(1, 100) <= self.LUK / 2:
             crit_multiplier = random.choice([1.5, 2, 2.5])
@@ -137,12 +115,10 @@ class Character:
         if self.MP >= 10:
             self.MP -= 10
             damage = self.calculate_damage(opponent, is_magical=True)
-            opponent.HP -= damage
-            print(f"✨ {self.name} 释放了技能 {self.skill}，造成 {damage} 伤害！ (MP -10)")
+            opponent.HP = max(0, opponent.HP - damage)
+            print(f"✨ {self.name} 释放 {self.skill}，造成 {damage} 伤害！ (MP -10)")
         else:
             print("❌ 技能释放失败，MP不足！")
-            return False
-        return True
 
     def gain_exp(self, amount):
         self.exp += amount
@@ -156,62 +132,34 @@ class Character:
 
     def level_up(self):
         self.level += 1
-        self.exp = 0
-        self.exp_to_next = int(self.exp_to_next * 1.5)
-        stats = ["MaxHP", "MaxMP", "ATK", "DEF", "MAT", "MDF", "AGI", "LUK"]
-        increments = [20, 10, 3, 2, 3, 2, 1, 1]
-        for stat, inc in zip(stats, increments):
+        self.exp, self.exp_to_next = 0, int(self.exp_to_next * 1.5)
+        growth = {"MaxHP": 20, "MaxMP": 10, "ATK": 3, "DEF": 2, "MAT": 3, "MDF": 2, "AGI": 1, "LUK": 1}
+        for stat, inc in growth.items():
             setattr(self, stat, getattr(self, stat) + inc)
         self.HP, self.MP = self.MaxHP, self.MaxMP
-        print(f"\033[33m{self.name} 升级到 {self.level} 级！\033[0m")
+        print(f"🎉 \033[33m{self.name} 升级到 {self.level} 级！\033[0m")
         print(f"{self.name}: (MaxHP: {self.MaxHP}, MaxMP: {self.MaxMP}, ATK: {self.ATK}, DEF: {self.DEF}, MAT: {self.MAT}, MDF: {self.MDF}, AGI: {self.AGI}, LUK: {self.LUK}, 技能: {self.skill})")
 
     def reset_stats(self):
-        """转生时重置角色属性，保留物品、武器、防具、金币"""
         print("✨ 你的属性被重置！但装备和金币得到了保留！")
-
-        self.level = 1
-        self.exp = 0
-        self.exp_to_next = 50
-        self.MaxHP = self.base_MaxHP
-        self.MaxMP = self.base_MaxMP
-        self.HP = self.MaxHP
-        self.MP = self.MaxMP
-        self.ATK = self.base_ATK
-        self.DEF = self.base_DEF
-        self.MAT = self.base_MAT
-        self.MDF = self.base_MDF
-        self.AGI = self.base_AGI
-        self.LUK = self.base_LUK
+        self.level, self.exp, self.exp_to_next = 1, 0, 50
+        for stat, value in self.base_stats.items():
+            setattr(self, stat, value)
+        self.HP, self.MP = self.MaxHP, self.MaxMP
 
 class Enemy(Character):
-    def __init__(self,id, name, max_hp, max_mp, atk, defense, mat, mdf, agi, luk, skill, exp_reward, gold_reward, min_level=1, max_level=99):
+    def __init__(self, id, name, max_hp, max_mp, atk, defense, mat, mdf, agi, luk, skill, exp_reward, gold_reward, min_level=1, max_level=99):
         super().__init__(name, max_hp, max_mp, atk, defense, mat, mdf, agi, luk, skill)
         self.id = id
-        self.exp_reward = exp_reward
-        self.gold_reward = gold_reward
-        self.weapon = None
-        self.equipment = None
-        self.min_level = min_level
-        self.max_level = max_level
-
-    def equip_weapon(self, weapon):
-        """敌人装备武器"""
-        self.weapon = weapon
-        self.ATK += weapon.attack_bonus
-
-    def equip_armor(self, equipment):
-        """敌人装备防具"""
-        self.equipment = equipment
-        self.DEF += equipment.defense_bonus
-        self.MaxHP += equipment.health_bonus
+        self.exp_reward, self.gold_reward = exp_reward, gold_reward
+        self.min_level, self.max_level = min_level, max_level
 
 class Item:
     def __init__(self, item_id, name, item_type, effect, value, price, note):
         self.id = int(item_id)
         self.name = name
-        self.type = item_type  # 恢复 / 战斗 / 任务
-        self.effect = effect  # HP / MP / ATK / DEF
+        self.type = item_type
+        self.effect = effect
         self.value = int(value)
         self.price = int(price)
         self.note = int(note)
@@ -259,7 +207,7 @@ class Inventory:
             print("（空）")
         for item_id, quantity in self.items.items():
             item = item_list[item_id]
-            print(f"{item.id}, {item.name} x{quantity} ({item.type})")
+            print(f"{item.id}, {item.name} x{quantity})")
 
     def use_item(self, item_id, target, item_list):
         """使用背包中的物品"""
