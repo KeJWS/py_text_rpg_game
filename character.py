@@ -56,8 +56,8 @@ class Character:
         self.gold = 0
         self.weapon = None
         self.equipment = None
-        self.weapons = {}  # 角色自己的武器库 {id: Weapon对象}
-        self.armors = {}   # 角色自己的防具库 {id: Equipment对象}
+        self.weapons = {}
+        self.armors = {}
         self.inventory = Inventory()
 
     def add_weapon(self, weapon):
