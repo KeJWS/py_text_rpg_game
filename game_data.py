@@ -1,5 +1,5 @@
 import csv
-from character import Character, Enemy, Weapon, Equipment, Item, Inventory
+from character import Character, Enemy, Weapon, Equipment, Item, Inventory, Map
 
 def load_classes():
     """从 CSV 加载职业数据，返回字典"""
@@ -40,6 +40,7 @@ def load_enemies():
             for row in reader:
                 min_level, max_level = parse_enemy_level(row["level_range"])
                 enemies.append(Enemy(
+                    id=int(row["id"]),
                     name=row["name"],
                     max_hp=int(row["max_hp"]),
                     max_mp=int(row["max_mp"]),
@@ -101,3 +102,13 @@ def load_armor():
             )
             armors[armor.id] = armor
     return armors
+
+def load_maps():
+    """加载地图数据"""
+    maps = {
+        "1": Map("草原", [1, 2]),  # 草原地图可以刷怪物ID 1 和 2
+        "2": Map("沙漠", [3, 4]),  # 森林地图可以刷怪物ID 3 和 4
+        "3": Map("死亡谷", [5, 6, 7]),  # 沙漠地图可以刷怪物ID 5 和 6
+    }
+    return maps
+

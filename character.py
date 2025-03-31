@@ -152,7 +152,7 @@ class Character:
 
     def gain_gold(self, amount):
         self.gold += amount
-        print(f"{self.name} 获得 {amount} 金币！(当前金币: {self.gold})")
+        print(f"{self.name} 获得 {amount} 金币！(当前\033[33m金币: {self.gold}\033[0m)")
 
     def level_up(self):
         self.level += 1
@@ -185,8 +185,9 @@ class Character:
         self.LUK = self.base_LUK
 
 class Enemy(Character):
-    def __init__(self, name, max_hp, max_mp, atk, defense, mat, mdf, agi, luk, skill, exp_reward, gold_reward, min_level=1, max_level=99):
+    def __init__(self,id, name, max_hp, max_mp, atk, defense, mat, mdf, agi, luk, skill, exp_reward, gold_reward, min_level=1, max_level=99):
         super().__init__(name, max_hp, max_mp, atk, defense, mat, mdf, agi, luk, skill)
+        self.id = id
         self.exp_reward = exp_reward
         self.gold_reward = gold_reward
         self.weapon = None
@@ -350,3 +351,14 @@ class ArmorShop:
                 print("⚠️ 你的金币不足！")
         else:
             print("⚠️ 护甲不存在！")
+
+class Map:
+    def __init__(self, name, enemy_ids):
+        self.name = name  # 地图名称
+        self.enemy_ids = enemy_ids  # 可刷怪物的ID列表
+
+    def get_enemy(self, player_level):
+        """根据玩家等级返回该地图的怪物"""
+        enemies = game_data.load_enemies()
+        available_enemies = [e for e in enemies if e.id in self.enemy_ids and e.min_level <= player_level <= e.max_level]
+        return random.choice(available_enemies) if available_enemies else None  # 若没有符合条件的怪物则返回 None

@@ -1,26 +1,27 @@
-def rebirth(player):
-    """执行转生逻辑，保留物品、武器、防具、金币，重置角色状态"""
-    print("\n💀 你已死亡！但你可以选择转生继续冒险！")
-    choice = input("是否转生？(y/n): ").lower()
-    
-    if choice == "y":
-        print("✨ 你获得了新生！但属性被重置...")
-        player.level = 1
-        player.exp = 0
-        player.exp_to_next = 100  # 假设初始升级经验为100
-        player.MaxHP = player.base_MaxHP  # 恢复初始HP
-        player.MaxMP = player.base_MaxMP  # 恢复初始MP
-        player.ATK = player.base_ATK
-        player.DEF = player.base_DEF
-        player.MAT = player.base_MAT
-        player.MDF = player.base_MDF
-        player.AGI = player.base_AGI
-        player.LUK = player.base_LUK
-        player.HP = player.MaxHP  # 满血复活
-        player.MP = player.MaxMP  # 满魔复活
-        
-        print("🎒 你的物品、装备和金币都被保留了！")
-        input("\n按 Enter 继续冒险...")
-    else:
-        print("👋 游戏结束，再见！")
-        exit()
+def drop_rewards(self):
+    """敌人死亡后掉落奖励"""
+    import random
+
+    items = load_items()
+    weapons = load_weapons()
+    armors = load_armor()
+
+    drop_chance = random.random()  # 生成0-1之间的随机数
+
+    if drop_chance < 0.5:  # 50% 概率掉落普通物品
+        item_id = random.choice(list(items.keys()))
+        item = items[item_id]  # 获取物品对象
+        self.player.inventory.add_item(item, 1)  # 传递物品对象
+        print(f"🛍️ 你获得了物品：{item.name}！")
+
+    if drop_chance < 0.3:  # 30% 概率掉落武器
+        weapon_id = random.choice(list(weapons.keys()))
+        weapon = weapons[weapon_id]  # 获取武器对象
+        self.player.weapons[weapon_id] = weapon
+        print(f"⚔️ 你获得了武器：{weapon.name}！")
+
+    if drop_chance < 0.2:  # 20% 概率掉落护甲
+        armor_id = random.choice(list(armors.keys()))
+        armor = armors[armor_id]  # 获取防具对象
+        self.player.armors[armor_id] = armor
+        print(f"🛡️ 你获得了防具：{armor.name}！")

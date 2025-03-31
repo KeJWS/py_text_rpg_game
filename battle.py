@@ -102,6 +102,7 @@ class Battle:
             print(f"🏆 你击败了 {self.enemy.name}！")
             self.player.gain_exp(self.enemy.exp_reward)
             self.player.gain_gold(self.enemy.gold_reward)
+            print(f"\033[31mHP: {self.player.HP}/{self.player.MaxHP}\033[0m")
 
         else:
             print("💀 \033[31m你被击败了，游戏结束。\033[0m")

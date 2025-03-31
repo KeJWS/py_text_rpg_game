@@ -1,6 +1,6 @@
 import random
 import os
-from game_data import load_classes, load_enemies, load_weapons, load_armor, load_items
+from game_data import load_classes, load_enemies, load_weapons, load_armor, load_items, load_maps
 from character import ItemShop, WeaponShop, ArmorShop, Weapon, Equipment
 from change_equipment import change_equipment
 from battle import Battle
@@ -41,9 +41,28 @@ def get_random_enemy(player_level):
     return enemy
 
 def battle(player):
-    enemy = get_random_enemy(player.level)
-    battle_instance = Battle(player, enemy)
-    battle_instance.process_battle()
+    chosen_map = choose_map()
+    while True:
+        enemy = chosen_map.get_enemy(player.level)
+
+        if not enemy:
+            print("⚠️ 这个地图没有适合你当前等级的敌人！")
+            break
+
+        print(f"你遇到了 {enemy.name}！")
+        battle_instance = Battle(player, enemy)
+        battle_instance.process_battle()
+
+        if player.HP <= 0:
+            break
+
+        if input("\n继续战斗？(输入 q 退出): ").lower() == "q":
+            print("你选择退出刷怪模式，回到主菜单。")
+            break
+
+        player.HP = min(player.MaxHP, player.HP + int(player.MaxHP * 0.25))
+        player.MP = min(player.MaxMP, player.MP + int(player.MaxMP * 0.25))
+        print("你恢复了一部分生命值和魔法值，准备迎接下一个怪物！")
 
 def external_change_equipment(player):
     clear_screen()
@@ -89,8 +108,21 @@ def rebirth(player):
         player.reset_stats()  # 直接调用 reset_stats() 方法
         input("\n按 Enter 继续冒险...")
     else:
-        print("👋 游戏结束，再见！")
+        print("游戏结束，再见！")
         exit()
+
+def choose_map():
+    maps = load_maps()
+
+    print("选择你的冒险地图:")
+    for key, map in maps.items():
+        print(f"{key}: {map.name}")
+
+    choice = input("请输入对应的数字: ")
+    clear_screen()
+    chosen_map = maps.get(choice, maps["1"])  # 默认为草原地图
+
+    return chosen_map  # 返回选择的地图
 
 def main():
     print("欢迎来到文字RPG冒险！")
@@ -166,9 +198,9 @@ def main():
             clear_screen()
             battle(player)
             if player.HP > 0:
-                player.HP = min(player.MaxHP, player.HP + int(player.MaxHP*0.25))
-                player.MP = min(player.MaxMP, player.MP + int(player.MaxMP*0.25))
-                print("你恢复了一部分生命值和魔法值，准备迎接下一个挑战！")
+                # player.HP = min(player.MaxHP, player.HP + int(player.MaxHP*0.25))
+                # player.MP = min(player.MaxMP, player.MP + int(player.MaxMP*0.25))
+                # print("你恢复了一部分生命值和魔法值，准备迎接下一个挑战！")
                 input("\n按 Enter 继续...")
             else:
                 rebirth(player)
