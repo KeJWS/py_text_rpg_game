@@ -1,6 +1,5 @@
 import game_data
 import random
-from save_manager import SaveManager
 
 class Weapon:
     def __init__(self, id, name, attack_bonus, price, note):
@@ -146,14 +145,6 @@ class Character:
         for stat, value in self.base_stats.items():
             setattr(self, stat, value)
         self.HP, self.MP = self.MaxHP, self.MaxMP
-
-    def save(self):
-        """保存角色数据"""
-        SaveManager.save_character(self)
-
-    def load(self):
-        """加载存档"""
-        return SaveManager.load_character(self)
 
 class Enemy(Character):
     def __init__(self, id, name, max_hp, max_mp, atk, defense, mat, mdf, agi, luk, skill, exp_reward, gold_reward, min_level=1, max_level=99):
