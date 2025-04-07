@@ -47,7 +47,7 @@ class Character:
         self.MAT, self.MDF, self.AGI, self.LUK = mat, mdf, agi, luk
         self.HP, self.MP = max_hp, max_mp
         self.skill = skill
-        self.level, self.exp, self.exp_to_next, self.gold = 1, 0, 1, 999
+        self.level, self.exp, self.exp_to_next, self.gold = 1, 0, 50, 99999
         self.weapon, self.equipment = None, None
         self.weapons, self.armors = {}, {}
         self.inventory = Inventory()
@@ -131,7 +131,7 @@ class Character:
 
     def level_up(self):
         self.level += 1
-        self.exp, self.exp_to_next = 0, int(1 * (self.level ** 1.5))
+        self.exp, self.exp_to_next = 0, int(50 * (self.level ** 1.5))
         growth = {"MaxHP": 20, "MaxMP": 10, "ATK": 3, "DEF": 2, "MAT": 3, "MDF": 2, "AGI": 1, "LUK": 1}
         for stat, inc in growth.items():
             setattr(self, stat, getattr(self, stat) + inc)

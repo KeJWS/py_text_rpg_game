@@ -5,6 +5,11 @@ from character import ItemShop, WeaponShop, ArmorShop, Weapon, Equipment
 from change_equipment import change_equipment
 from battle import Battle
 
+import random_weapons
+
+with open("weapons.csv", "w", encoding="utf-8") as f:
+    f.write(random_weapons.generate_weapon_list(299))
+
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
