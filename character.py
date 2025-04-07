@@ -47,7 +47,7 @@ class Character:
         self.MAT, self.MDF, self.AGI, self.LUK = mat, mdf, agi, luk
         self.HP, self.MP = max_hp, max_mp
         self.skill = skill
-        self.level, self.exp, self.exp_to_next, self.gold = 1, 0, 50, 0
+        self.level, self.exp, self.exp_to_next, self.gold = 1, 0, 1, 999
         self.weapon, self.equipment = None, None
         self.weapons, self.armors = {}, {}
         self.inventory = Inventory()
@@ -131,13 +131,12 @@ class Character:
 
     def level_up(self):
         self.level += 1
-        self.exp, self.exp_to_next = 0, int(50 * (self.level ** 1.5))
+        self.exp, self.exp_to_next = 0, int(1 * (self.level ** 1.5))
         growth = {"MaxHP": 20, "MaxMP": 10, "ATK": 3, "DEF": 2, "MAT": 3, "MDF": 2, "AGI": 1, "LUK": 1}
         for stat, inc in growth.items():
             setattr(self, stat, getattr(self, stat) + inc)
         self.HP, self.MP = self.MaxHP, self.MaxMP
         print(f"🎉 \033[33m{self.name} 升级到 {self.level} 级！\033[0m")
-        print(f"{self.name}: (MaxHP: {self.MaxHP}, MaxMP: {self.MaxMP}, ATK: {self.ATK}, DEF: {self.DEF}, MAT: {self.MAT}, MDF: {self.MDF}, AGI: {self.AGI}, LUK: {self.LUK}, 技能: {self.skill})")
 
     def reset_stats(self):
         print("✨ 你的属性被重置！但装备和金币得到了保留！")

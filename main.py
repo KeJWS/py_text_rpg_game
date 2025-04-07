@@ -1,6 +1,6 @@
 import random
 import os
-from game_data import load_classes, load_enemies, load_weapons, load_armor, load_items, load_maps
+from game_data import load_classes, load_enemies, load_weapons, load_armor, load_items
 from character import ItemShop, WeaponShop, ArmorShop, Weapon, Equipment
 from change_equipment import change_equipment
 from battle import Battle
@@ -40,9 +40,8 @@ def get_random_enemy(player_level):
     return enemy
 
 def battle(player):
-    chosen_map = choose_map()
     while True:
-        enemy = chosen_map.get_enemy(player.level)
+        enemy = get_random_enemy(player.level)
 
         if not enemy:
             print("⚠️ 这个地图没有适合你当前等级的敌人！")
@@ -110,19 +109,6 @@ def rebirth(player):
         print("游戏结束，再见！")
         exit()
 
-def choose_map():
-    maps = load_maps()
-
-    print("选择你的冒险地图:")
-    for key, map in maps.items():
-        print(f"{key}: {map.name}")
-
-    choice = input("请输入对应的数字: ")
-    clear_screen()
-    chosen_map = maps.get(choice, maps["1"])
-
-    return chosen_map
-
 def main():
     print("欢迎来到文字RPG冒险！")
     player, weapon_id, armor_id = choose_class()
@@ -141,7 +127,7 @@ def main():
         display_player_info(player)
 
         print()
-        command = input("e: 退出, w: 换装, b: 背包, m: 商店, a: 战斗")
+        command = input("e: 退出, w: 换装, b: 背包, m: 商店, a: 战斗 ")
         if command.lower() == 'e':
             print("游戏结束，再见！")
             break

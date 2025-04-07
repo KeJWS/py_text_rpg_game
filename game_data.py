@@ -84,15 +84,6 @@ def load_armor():
             armors[armor.id] = armor
     return armors
 
-def load_maps():
-    """加载地图数据"""
-    maps = {
-        "1": Map("草原 Lv1", [1, 2, 4]),
-        "2": Map("沙漠 Lv3", [3, 4]),
-        "3": Map("死亡谷 Lv7", [5, 6, 7]),
-    }
-    return maps
-
 # 通过 ID 获取武器
 def load_weapon_by_id(weapon_id):
     weapons = load_weapons()
